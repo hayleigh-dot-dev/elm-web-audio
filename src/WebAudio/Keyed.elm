@@ -54,105 +54,105 @@ node =
     Keyed
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode>
+{-| 
 -}
 analyser : String -> List Property -> List Node -> Node
 analyser k =
     node k "AnalyserNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
+{-| 
 -}
 audioBufferSource : String -> List Property -> List Node -> Node
 audioBufferSource k =
     node k "AudioBufferSourceNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
+{-| 
 -}
 biquadFilter : String -> List Property -> List Node -> Node
 biquadFilter k =
     node k "BiquadFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
+{-| 
 -}
 channelMerger : String -> List Property -> List Node -> Node
 channelMerger k =
     node k "ChannelMergerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChanneSplliterNode>
+{-| 
 -}
 channelSplitter : String -> List Property -> List Node -> Node
 channelSplitter k =
     node k "ChannelSplitterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
+{-| 
 -}
 constantSource : String -> List Property -> List Node -> Node
 constantSource k =
     node k "ConstantSource"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
+{-| 
 -}
 convolver : String -> List Property -> List Node -> Node
 convolver k =
     node k "ConvolverNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
+{-| 
 -}
 delay : String -> List Property -> List Node -> Node
 delay k =
     node k "DelayNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
+{-| 
 -}
 dynamicsCompressor : String -> List Property -> List Node -> Node
 dynamicsCompressor k =
     node k "DynamicsCompressorNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
+{-| 
 -}
 gain : String -> List Property -> List Node -> Node
 gain k =
     node k "GainNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/>
+{-| 
 -}
 iirFilter : String -> List Property -> List Node -> Node
 iirFilter k =
     node k "IIRFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
+{-| 
 -}
 oscillator : String -> List Property -> List Node -> Node
 oscillator k =
     node k "OscillatorNode"
 
 
-{-| An alias for `oscillator`.
+{-| 
 -}
 osc : String -> List Property -> List Node -> Node
 osc k =
     oscillator k
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
+{-| 
 -}
 stereoPanner : String -> List Property -> List Node -> Node
 stereoPanner k =
     node k "StereoPannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
+{-| 
 -}
 waveShaper : String -> List Property -> List Node -> Node
 waveShaper k =

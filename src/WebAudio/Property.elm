@@ -1,9 +1,9 @@
 module WebAudio.Property exposing
-    ( Property(..)
+    ( Property
     , Type(..), Label, Value(..)
     , property, audioParam, nodeProperty
     , attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve, delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee, loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels, normalize, normalise, offset, orientationX, orientationY, orientationZ, oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant, threshold, type_
-    , encode, encodeType, encodeValue
+    , encode
     )
 
 {-|
@@ -28,7 +28,7 @@ module WebAudio.Property exposing
 
 # JSON Encoding
 
-@docs encode, encodeType, encodeValue
+@docs encode
 
 -}
 
@@ -41,7 +41,10 @@ type Property
     = Property Type Label Value
 
 
-{-| -}
+{-| See [here](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam) for 
+a description on what an AudioParam is. A NodeProperty is simply anything that is 
+not an AudioParam.
+-}
 type Type
     = AudioParam
     | NodeProperty
@@ -52,7 +55,11 @@ type alias Label =
     String
 
 
-{-| -}
+{-| Properties can hold a variety of values. We use this union type to wrap over 
+elm's native types. Typically you won't need to use this type directly (all of the 
+helper functions below take native elm types and do the conversion for you), but 
+if you are defining custom properties then you'll need to handle Values yourself. 
+-}
 type Value
     = BValue Bool
     | FValue Float
@@ -384,6 +391,3 @@ encodeValue v =
         SValue s ->
             Encode.string s
 
-
-
--- Json Decoding

@@ -18,7 +18,7 @@ module WebAudio exposing
 
 # Basic Constructors
 
-@docs node, keyed, ref, key
+@docs node, ref, key
 
 
 # Web Audio Nodes

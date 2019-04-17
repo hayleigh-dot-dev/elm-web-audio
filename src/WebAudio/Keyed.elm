@@ -19,14 +19,14 @@ module WebAudio.Keyed exposing
 
 # Web Audio Nodes
 
-@docs analyser, audioBufferSource, audioDestination, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, dac, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, stereoPanner, waveShaper
+@docs analyser, audioBufferSource, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, stereoPanner, waveShaper
 
 -}
 
 import WebAudio exposing (..)
 import WebAudio.Property as Property exposing (..)
 
-
+{-| -}
 type alias Node =
     WebAudio.Node
 

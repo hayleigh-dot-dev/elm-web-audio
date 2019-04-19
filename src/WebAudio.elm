@@ -1,6 +1,5 @@
 module WebAudio exposing
-    ( Node(..)
-    , Type, Key
+    ( Node(..), Type, Key, Graph
     , node, ref, key
     , analyser, audioBufferSource, audioDestination, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, dac, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, panner, stereoPanner, waveShaper
     , encode
@@ -11,7 +10,7 @@ module WebAudio exposing
 
 # Types
 
-@docs Node, Type, Key
+@docs Node, Type, Key, Graph
 
 
 # Basic Constructors
@@ -26,10 +25,11 @@ module WebAudio exposing
 
 # JSON Encoding
 
-To turn the json in Web Audio nodes, you need to know what that data looks like. 
+To turn the json in Web Audio nodes, you need to know what that data looks like.
 Here's a breakdown of how everything is encoded:
 
 **Node:**
+
 ```json
 {
     "type": "OscillatorNode",
@@ -43,6 +43,7 @@ Here's a breakdown of how everything is encoded:
 ```
 
 **Keyed:**
+
 ```json
 {
     "key": "myOsc",
@@ -57,6 +58,7 @@ Here's a breakdown of how everything is encoded:
 ```
 
 **Ref:**
+
 ```json
 {
     "key": "myOsc",
@@ -65,15 +67,16 @@ Here's a breakdown of how everything is encoded:
 ```
 
 Properties can come in two types, AudioParam and NodeProperty. While the Web
-Audio API doesn't make an official distinction between the two, how they are used 
-differs. 
+Audio API doesn't make an official distinction between the two, how they are used
+differs.
 
-AudioParams represent parameters that can be updated at either audio rate (a-rate) 
-or control rate (k-rate). Other audio nodes can connect to an AudioParam and 
-modulate its value in real time. Examples of AudioParams include frequency, gain, 
+AudioParams represent parameters that can be updated at either audio rate (a-rate)
+or control rate (k-rate). Other audio nodes can connect to an AudioParam and
+modulate its value in real time. Examples of AudioParams include frequency, gain,
 and delayTime.
 
 **AudioParam:**
+
 ```json
 {
     "type": "AudioParam",
@@ -82,15 +85,16 @@ and delayTime.
 }
 ```
 
-NodeProperties are any other parameter on an audio node. An example of a NodeProperty 
+NodeProperties are any other parameter on an audio node. An example of a NodeProperty
 is an OscillatorNode's "type" parameter.
 
 **NodeProperty:**
+
 ```json
 {
    "type": "NodeProperty",
    "label": "type",
-   "value": "square" 
+   "value": "square"
 }
 ```
 
@@ -127,6 +131,11 @@ element.
 -}
 type alias Key =
     String
+
+
+{-| -}
+type alias Graph =
+    List Node
 
 
 {-| General way to construct Web Audio nodes. This is used
@@ -193,6 +202,7 @@ Common properties:
     - minDecibels
     - maxDecibels
     - smoothingTimeConstant
+
 -}
 analyser : List Property -> List Node -> Node
 analyser =
@@ -209,6 +219,7 @@ Common properties:
     - loopStart
     - loopEnd
     - playbackRate
+
 -}
 audioBufferSource : List Property -> List Node -> Node
 audioBufferSource =
@@ -225,10 +236,12 @@ audioDestination =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
 
 Common properties:
-    - frequency
-    - detune
-    - Q
-    - type
+
+  - frequency
+  - detune
+  - Q
+  - type
+
 -}
 biquadFilter : List Property -> List Node -> Node
 biquadFilter =
@@ -236,7 +249,6 @@ biquadFilter =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
-
 -}
 channelMerger : List Property -> List Node -> Node
 channelMerger =
@@ -253,7 +265,9 @@ channelSplitter =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
 
 Common properties:
-    - offset
+
+  - offset
+
 -}
 constantSource : List Property -> List Node -> Node
 constantSource =
@@ -263,8 +277,10 @@ constantSource =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
 
 Common properties:
-    - buffer
-    - normalize | normalise
+
+  - buffer
+  - normalize | normalise
+
 -}
 convolver : List Property -> List Node -> Node
 convolver =
@@ -281,7 +297,9 @@ dac =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
 
 Common properties:
-    - delayTime
+
+  - delayTime
+
 -}
 delay : List Property -> List Node -> Node
 delay =
@@ -291,12 +309,14 @@ delay =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
 
 Common properties:
-    - threshold
-    - knee
-    - ratio
-    - reduction
-    - attack
-    - release
+
+  - threshold
+  - knee
+  - ratio
+  - reduction
+  - attack
+  - release
+
 -}
 dynamicsCompressor : List Property -> List Node -> Node
 dynamicsCompressor =
@@ -306,7 +326,9 @@ dynamicsCompressor =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
 
 Common properties:
-    - gain
+
+  - gain
+
 -}
 gain : List Property -> List Node -> Node
 gain =
@@ -323,9 +345,11 @@ iirFilter =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
 
 Common properties:
-    - frequency
-    - detune
-    - type
+
+  - frequency
+  - detune
+  - type
+
 -}
 oscillator : List Property -> List Node -> Node
 oscillator =
@@ -342,20 +366,22 @@ osc =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
 
 Common properties:
-    - coneInnerAngle
-    - coneOuterAngle
-    - coneOuterGain
-    - distanceModel
-    - maxDistance
-    - orientationX
-    - orientationY
-    - orientationZ
-    - panningModel
-    - positionX
-    - positionY
-    - positionZ
-    - refDistance
-    - rolloffFactor
+
+  - coneInnerAngle
+  - coneOuterAngle
+  - coneOuterGain
+  - distanceModel
+  - maxDistance
+  - orientationX
+  - orientationY
+  - orientationZ
+  - panningModel
+  - positionX
+  - positionY
+  - positionZ
+  - refDistance
+  - rolloffFactor
+
 -}
 panner : List Property -> List Node -> Node
 panner =
@@ -365,7 +391,9 @@ panner =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
 
 Common properties:
-    - pan
+
+  - pan
+
 -}
 stereoPanner : List Property -> List Node -> Node
 stereoPanner =
@@ -375,8 +403,10 @@ stereoPanner =
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
 
 Common properties:
-    - curve
-    - oversample
+
+  - curve
+  - oversample
+
 -}
 waveShaper : List Property -> List Node -> Node
 waveShaper =

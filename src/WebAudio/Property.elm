@@ -66,7 +66,9 @@ type Value
     | FValueList (List Float)
     | IValue Int
     | SValue String
-
+    | ValueAtTime (Float, Float)
+    | LinearRampToValueAtTime (Float, Float)
+    | ExponentialRampToValueAtTime (Float, Float)
 
 
 -- Basic constructors
@@ -391,3 +393,23 @@ encodeValue v =
         SValue s ->
             Encode.string s
 
+        ValueAtTime (f, t) ->
+            Encode.object
+                [ ("type", Encode.string "ValueAtTime") 
+                , ("value", Encode.float f)
+                , ("time", Encode.float t)
+                ]
+
+        LinearRampToValueAtTime (f, t) ->
+            Encode.object
+                [ ("type", Encode.string "LinearRamp") 
+                , ("value", Encode.float f)
+                , ("time", Encode.float t)
+                ]
+
+        ExponentialRampToValueAtTime (f, t) ->
+            Encode.object
+                [ ("type", Encode.string "ExponentialRamp") 
+                , ("value", Encode.float f)
+                , ("time", Encode.float t)
+                ]

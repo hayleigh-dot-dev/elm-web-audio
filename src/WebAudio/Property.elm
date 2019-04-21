@@ -211,6 +211,12 @@ maxDecibels =
 
 
 {-| -}
+maxDelayTime : Float -> Property
+maxDelayTime =
+    FValue >> nodeProperty "maxDelayTime"
+
+
+{-| -}
 minDecibels : Float -> Property
 minDecibels =
     FValue >> nodeProperty "minDecibels"

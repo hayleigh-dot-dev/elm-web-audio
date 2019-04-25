@@ -76,24 +76,21 @@ type Value
 
 {-| -}
 property : Type -> Label -> Value -> Property
-property type__ label value =
-    Property type__ label value
+property =
+    Property
 
 
 {-| -}
 audioParam : Label -> Value -> Property
-audioParam label value =
-    Property AudioParam label value
+audioParam =
+    Property AudioParam
 
 
 {-| -}
 nodeProperty : Label -> Value -> Property
-nodeProperty label value =
-    Property NodeProperty label value
+nodeProperty =
+    Property NodeProperty
 
-
-
--- Common Web Audio node properties
 
 
 {-| -}

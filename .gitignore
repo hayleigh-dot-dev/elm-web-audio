@@ -4,3 +4,9 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 
+#
+node_modules
+
+# parcel things
+dist
+.cache

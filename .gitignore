@@ -9,4 +9,4 @@ node_modules
 
 # parcel things
 dist
-.cachenode_modules/
+.cache

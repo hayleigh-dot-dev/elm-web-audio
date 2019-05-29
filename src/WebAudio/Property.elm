@@ -1,418 +1,422 @@
-module WebAudio.Property exposing
-    ( Property
-    , Type(..), Label, Value(..)
-    , property, audioParam, nodeProperty
-    , attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve, delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee, loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels, normalize, normalise, offset, orientationX, orientationY, orientationZ, oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant, threshold, type_
-    , encode
-    )
-
-{-|
+module WebAudio.Property exposing (..)
 
 
-# Types
-
-@docs Property
-
-@docs Type, Label, Value
-
-
-# Basic Constructors
-
-@docs property, audioParam, nodeProperty
-
-
-# Common Properties
-
-@docs attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve, delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee, loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels, normalize, normalise, offset, orientationX, orientationY, orientationZ, oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant, threshold, type_
-
-
-# JSON Encoding
-
-@docs encode
-
--}
-
-import Json.Decode as Decode
-import Json.Encode as Encode
+import Json.Encode
 
 
 {-| -}
 type Property
-    = Property Type Label Value
-
-
-{-| See [here](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam) for 
-a description on what an AudioParam is. A NodeProperty is simply anything that is 
-not an AudioParam.
--}
-type Type
-    = AudioParam
-    | NodeProperty
+  = NodeProperty String Value
+  | AudioParam String Value
+  | ScheduledUpdate String 
+    { method : ScheduledUpdateMethod
+    , target : Value
+    , time : Float
+    }
 
 
 {-| -}
-type alias Label =
-    String
+type alias Value = Json.Encode.Value
 
 
-{-| Properties can hold a variety of values. We use this union type to wrap over 
-elm's native types. Typically you won't need to use this type directly (all of the 
-helper functions below take native elm types and do the conversion for you), but 
-if you are defining custom properties then you'll need to handle Values yourself. 
--}
-type Value
-    = BValue Bool
-    | FValue Float
-    | FValueList (List Float)
-    | IValue Int
-    | SValue String
-    | ValueAtTime (Float, Float)
-    | LinearRampToValueAtTime (Float, Float)
-    | ExponentialRampToValueAtTime (Float, Float)
-
-
--- Basic constructors
+type ScheduledUpdateMethod
+  = SetValueAtTime
+  | LinearRampToValueAtTime
+  | ExponentialRampToValueAtTime
 
 
 {-| -}
-property : Type -> Label -> Value -> Property
-property =
-    Property
+bool : Bool -> Value
+bool =
+  Json.Encode.bool
 
 
 {-| -}
-audioParam : Label -> Value -> Property
-audioParam =
-    Property AudioParam
+float : Float -> Value
+float =
+  Json.Encode.float
 
 
 {-| -}
-nodeProperty : Label -> Value -> Property
+floatList : List Float -> Value
+floatList =
+  Json.Encode.list Json.Encode.float
+
+
+{-| -}
+int : Int -> Value
+int = 
+  Json.Encode.int
+
+
+{-| -}
+string : String -> Value
+string =
+  Json.Encode.string
+
+
+{-| -}
+nodeProperty : String -> Value -> Property
 nodeProperty =
-    Property NodeProperty
+  NodeProperty
 
+
+{-| -}
+audioParam : String -> Value -> Property
+audioParam =
+  AudioParam 
+
+
+{-| -}
+setValueAtTime : Property -> Float -> Property
+setValueAtTime property time =
+  case property of
+    NodeProperty label value ->
+      ScheduledUpdate label 
+        { method = SetValueAtTime
+        , target = value
+        , time = time
+        }
+
+    AudioParam label value ->
+      ScheduledUpdate label
+        { method = SetValueAtTime
+        , target = value
+        , time = time
+        }
+
+    ScheduledUpdate _ _ ->
+      property
+
+
+{-| -}
+linearRampToValueAtTime : Property -> Float -> Property
+linearRampToValueAtTime property time =
+  case property of
+    NodeProperty label value ->
+      ScheduledUpdate label 
+        { method = LinearRampToValueAtTime
+        , target = value
+        , time = time
+        }
+
+    AudioParam label value ->
+      ScheduledUpdate label
+        { method = LinearRampToValueAtTime
+        , target = value
+        , time = time
+        }
+
+    ScheduledUpdate _ _ ->
+      property
+
+
+{-| -}
+exponentialRampToValueAtTime : Property -> Float -> Property
+exponentialRampToValueAtTime property time =
+  case property of
+    NodeProperty label value ->
+      ScheduledUpdate label 
+        { method = ExponentialRampToValueAtTime
+        , target = value
+        , time = time
+        }
+
+    AudioParam label value ->
+      ScheduledUpdate label
+        { method = ExponentialRampToValueAtTime
+        , target = value
+        , time = time
+        }
+
+    ScheduledUpdate _ _ ->
+      property
 
 
 {-| -}
 attack : Float -> Property
 attack =
-    FValue >> audioParam "attack"
+    float >> audioParam "attack"
 
 
 {-| -}
 buffer : List Float -> Property
 buffer =
-    FValueList >> nodeProperty "buffer"
+    floatList >> nodeProperty "buffer"
 
 
 {-| -}
 coneInnerAngle : Float -> Property
 coneInnerAngle =
-    FValue >> nodeProperty "coneInnerAngle"
+    float >> nodeProperty "coneInnerAngle"
 
 
 {-| -}
 coneOuterAngle : Float -> Property
 coneOuterAngle =
-    FValue >> nodeProperty "coneOuterAngle"
+    float >> nodeProperty "coneOuterAngle"
 
 
 {-| -}
 coneOuterGain : Float -> Property
 coneOuterGain =
-    FValue >> nodeProperty "coneOuterGain"
+    float >> nodeProperty "coneOuterGain"
 
 
 {-| -}
 curve : List Float -> Property
 curve =
-    FValueList >> nodeProperty "curve"
+    floatList >> nodeProperty "curve"
 
 
 {-| -}
 delayTime : Float -> Property
 delayTime =
-    FValue >> audioParam "delayTime"
+    float >> audioParam "delayTime"
 
 
 {-| -}
 detune : Float -> Property
 detune =
-    FValue >> audioParam "detune"
+    float >> audioParam "detune"
 
 
 {-| -}
 distanceModel : String -> Property
 distanceModel =
-    SValue >> nodeProperty "distanceModel"
+    string >> nodeProperty "distanceModel"
 
 
 {-| -}
 fftSize : Int -> Property
 fftSize =
-    IValue >> nodeProperty "fftSize"
+    int >> nodeProperty "fftSize"
 
 
 {-| -}
 frequency : Float -> Property
 frequency =
-    FValue >> audioParam "frequency"
-
-
-{-| -}
-freq : Float -> Property
-freq =
-    frequency
+    float >> audioParam "frequency"
 
 
 {-| -}
 gain : Float -> Property
 gain =
-    FValue >> audioParam "gain"
+    float >> audioParam "gain"
 
 
 {-| -}
 knee : Float -> Property
 knee =
-    FValue >> audioParam "knee"
+    float >> audioParam "knee"
 
 
 {-| -}
 loop : Bool -> Property
 loop =
-    BValue >> nodeProperty "loop"
+    bool >> nodeProperty "loop"
 
 
 {-| -}
 loopEnd : Float -> Property
 loopEnd =
-    FValue >> nodeProperty "loopEnd"
+    float >> nodeProperty "loopEnd"
 
 
 {-| -}
 loopStart : Float -> Property
 loopStart =
-    FValue >> nodeProperty "loopStart"
+    float >> nodeProperty "loopStart"
 
 
 {-| -}
 maxChannelCount : Int -> Property
 maxChannelCount =
-    IValue >> nodeProperty "maxChannelCount"
+    int >> nodeProperty "maxChannelCount"
 
 
 {-| -}
 maxDecibels : Float -> Property
 maxDecibels =
-    FValue >> nodeProperty "maxDecibels"
-
-
-{-| -}
-maxDelayTime : Float -> Property
-maxDelayTime =
-    FValue >> nodeProperty "maxDelayTime"
+    float >> nodeProperty "maxDecibels"
 
 
 {-| -}
 minDecibels : Float -> Property
 minDecibels =
-    FValue >> nodeProperty "minDecibels"
+    float >> nodeProperty "minDecibels"
 
 
 {-| -}
 normalize : Bool -> Property
 normalize =
-    BValue >> nodeProperty "normalize"
-
-
-{-| -}
-normalise : Bool -> Property
-normalise =
-    normalize
+    bool >> nodeProperty "normalize"
 
 
 {-| -}
 offset : Float -> Property
 offset =
-    FValue >> audioParam "offset"
+    float >> audioParam "offset"
 
 
 {-| -}
 orientationX : Float -> Property
 orientationX =
-    FValue >> audioParam "orientationX"
+    float >> audioParam "orientationX"
 
 
 {-| -}
 orientationY : Float -> Property
 orientationY =
-    FValue >> audioParam "orientationY"
+    float >> audioParam "orientationY"
 
 
 {-| -}
 orientationZ : Float -> Property
 orientationZ =
-    FValue >> audioParam "orientationZ"
+    float >> audioParam "orientationZ"
 
 
 {-| -}
 oversample : String -> Property
 oversample =
-    SValue >> nodeProperty "oversample"
+    string >> nodeProperty "oversample"
 
 
 {-| -}
 pan : Float -> Property
 pan =
-    FValue >> audioParam "pan"
+    float >> audioParam "pan"
 
 
 {-| -}
 panningModel : String -> Property
 panningModel =
-    SValue >> nodeProperty "panningModel"
+    string >> nodeProperty "panningModel"
 
 
 {-| -}
 playbackRate : Float -> Property
 playbackRate =
-    FValue >> audioParam "playbackRate"
+    float >> audioParam "playbackRate"
 
 
 {-| -}
 positionX : Float -> Property
 positionX =
-    FValue >> audioParam "positionX"
+    float >> audioParam "positionX"
 
 
 {-| -}
 positionY : Float -> Property
 positionY =
-    FValue >> audioParam "positionY"
+    float >> audioParam "positionY"
 
 
 {-| -}
 positionZ : Float -> Property
 positionZ =
-    FValue >> audioParam "positionZ"
+    float >> audioParam "positionZ"
 
 
 {-| -}
 q : Float -> Property
 q =
-    FValue >> audioParam "q"
+    float >> audioParam "q"
 
 
 {-| -}
 ratio : Float -> Property
 ratio =
-    FValue >> audioParam "ratio"
+    float >> audioParam "ratio"
 
 
 {-| -}
 reduction : Float -> Property
 reduction =
-    FValue >> audioParam "reduction"
+    float >> audioParam "reduction"
 
 
 {-| -}
 refDistance : Float -> Property
 refDistance =
-    FValue >> nodeProperty "refDistance"
+    float >> nodeProperty "refDistance"
 
 
 {-| -}
 release : Float -> Property
 release =
-    FValue >> audioParam "release"
+    float >> audioParam "release"
 
 
 {-| -}
 rolloffFactor : Float -> Property
 rolloffFactor =
-    FValue >> nodeProperty "rolloffFactor"
+    float >> nodeProperty "rolloffFactor"
 
 
 {-| -}
 smoothingTimeConstant : Float -> Property
 smoothingTimeConstant =
-    FValue >> nodeProperty "smoothingTimeConstant"
+    float >> nodeProperty "smoothingTimeConstant"
 
 
 {-| -}
 threshold : Float -> Property
 threshold =
-    FValue >> audioParam "threshold"
+    float >> audioParam "threshold"
 
 
 {-| -}
 type_ : String -> Property
 type_ =
-    SValue >> nodeProperty "type"
-
-
-
--- Json
--- Json Encoding
+    string >> nodeProperty "type"
 
 
 {-| -}
-encode : Property -> Encode.Value
-encode (Property t l v) =
-    Encode.object
-        [ ( "type", encodeType t )
-        , ( "label", Encode.string l )
-        , ( "value", encodeValue v )
+encode : Property -> Value
+encode property =
+  case property of
+    NodeProperty label value ->
+      Json.Encode.object
+        [ ("type", Json.Encode.string "NodeProperty")
+        , ("label", Json.Encode.string label)
+        , ("value", value)
+        ]
+
+    AudioParam label value ->
+      Json.Encode.object
+        [ ("type", Json.Encode.string "AudioParam")
+        , ("label", Json.Encode.string label)
+        , ("value", value)
         ]
 
 
-{-| -}
-encodeType : Type -> Encode.Value
-encodeType t =
-    case t of
-        AudioParam ->
-            Encode.string "AudioParam"
-
-        NodeProperty ->
-            Encode.string "NodeProperty"
+    ScheduledUpdate label value ->
+      Json.Encode.object
+        [ ("type", Json.Encode.string "ScheduledUpdate")
+        , ("label", Json.Encode.string label)
+        , ("value", encodeScheduledUpdateValue value)
+        ]
 
 
-{-| -}
-encodeValue : Value -> Encode.Value
-encodeValue v =
-    case v of
-        BValue b ->
-            Encode.bool b
+encodeScheduledUpdateValue : { method : ScheduledUpdateMethod, target : Value, time : Float } -> Value
+encodeScheduledUpdateValue { method, target, time } =
+  Json.Encode.object
+    [ ("method", encodeScheduledUpdateMethod method)
+    , ("target", target)
+    , ("time", Json.Encode.float time)
+    ]
 
-        FValue f ->
-            Encode.float f
 
-        FValueList fs ->
-            Encode.list Encode.float fs
+encodeScheduledUpdateMethod : ScheduledUpdateMethod -> Value
+encodeScheduledUpdateMethod method =
+  case method of
+    SetValueAtTime ->
+      Json.Encode.string "setValueAtTime"
 
-        IValue i ->
-            Encode.int i
+    LinearRampToValueAtTime ->
+      Json.Encode.string "linearRampToValueAtTime"
 
-        SValue s ->
-            Encode.string s
-
-        ValueAtTime (f, t) ->
-            Encode.object
-                [ ("type", Encode.string "ValueAtTime") 
-                , ("value", Encode.float f)
-                , ("time", Encode.float t)
-                ]
-
-        LinearRampToValueAtTime (f, t) ->
-            Encode.object
-                [ ("type", Encode.string "LinearRamp") 
-                , ("value", Encode.float f)
-                , ("time", Encode.float t)
-                ]
-
-        ExponentialRampToValueAtTime (f, t) ->
-            Encode.object
-                [ ("type", Encode.string "ExponentialRamp") 
-                , ("value", Encode.float f)
-                , ("time", Encode.float t)
-                ]
+    ExponentialRampToValueAtTime ->
+      Json.Encode.string "exponentialRampToValueAtTime"

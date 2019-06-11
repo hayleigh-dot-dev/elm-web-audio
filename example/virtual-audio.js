@@ -1,16 +1,15 @@
-/* global AudioContext */
+import { defer } from '../utils'
 
-const defer = fn => setTimeout(fn, 0)
+const AudioContext = window.AudioContext || window.webkitAudioContext
 
-export class VirtualAudioGraph {
-  // STATIC METHODS =========================================================
-
+export default class VirtualAudioGraph {
+  // Static Methods ============================================================
   //
   static prepare (graph = []) {
     // The first step in preparing the graph is to key each virtual node.
     // This is how we perform a diff between graphs and calculate what has
     // changed each update.
-    const keyGraph = (graph, base = '') => {
+    const key = (graph, base = '') => {
       graph.forEach((node, i) => {
         // RefNodes always have a key, and they also
         // cannot have connections or properties
@@ -20,9 +19,10 @@ export class VirtualAudioGraph {
         // This is how we track changes to the graph in a slightly
         // more organised way
         if (!node.key) node.key = `${base}_${i}`
+
         // Recursively assign keys to this nodes connections.
         if (node.connections && node.connections.length > 0) {
-          keyGraph(node.connections, node.key)
+          key(node.connections, node.key)
         }
       })
 
@@ -34,121 +34,120 @@ export class VirtualAudioGraph {
     // connections. This isns't the easiest data structure to deal with
     // however, so the next step in preparation is the flatten the graph
     // into a single array.
-    const flattenGraph = (graph, flatGraph = [], depth = 0) => {
+    const flatten = (graph, nodes = {}, depth = 0) => {
       graph.forEach((node, i) => {
         // Don't push RefNodes to the flat graph.
-        if (node.type !== 'RefNode') flatGraph.push(node)
-        if (node.connections) flatGraph = flattenGraph(node.connections, flatGraph, depth + 1)
+        if (node.type !== 'RefNode') nodes[node.key] = node
+        if (node.connections) flatten(node.connections, nodes, depth + 1)
         // If we're deeper than the root of the graph, replace
         // this node with a reference to itself by key.
         if (depth > 0) graph[i] = { type: 'RefNode', key: node.key }
       })
 
-      return flatGraph
+      return nodes
     }
 
-    // Finally, we sort the nodes in the graph by their key.
-    const sortGraph = graph =>
-      graph.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
-
-    return sortGraph(flattenGraph(keyGraph(graph)))
+    return flatten(key(graph))
   }
 
   //
-  static diff (a, b, patches = { removed: [], created: [], updated: [] }) {
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      const nodeA = a[i]
-      const nodeB = b[i]
+  static diff (oldNodes, newNodes) {
+    const patches = { created: [], updated: [], removed: [] }
 
-      if (!nodeA) {
-        // There was no previous node
-        patches.created.push({ type: 'node', key: nodeB.key, data: nodeB })
-        nodeB.connections.forEach(connection => {
-          patches.created.push({ type: 'connection', key: nodeB.key, data: connection.key.split('.') })
+    for (const newNode of Object.values(newNodes)) {
+      const oldNode = oldNodes[newNode.key]
+
+      // A node with newNode.key does not exist in the old graph, so this must
+      // mean we've created a brand new node.
+      if (!oldNode) {
+        patches.created.push({ type: 'node', key: newNode.key, data: newNode })
+
+        newNode.connections.forEach(connection => {
+          patches.created.push({ type: 'connection', key: newNode.key, data: connection.key.split('.') })
         })
-      } else if (!nodeB) {
-        // The node has been removed
-        patches.removed.push({ type: 'node', key: nodeA.key, data: nodeA })
-      } else if (nodeA.key !== nodeB.key) {
-        // The key of the node has changed
-        patches.removed.push({ type: 'node', key: nodeA.key, data: nodeA })
-        patches.created.push({ type: 'node', key: nodeB.key, data: nodeB })
-        nodeB.connections.forEach(connection => {
-          patches.created.push({ type: 'connection', key: nodeB.key, data: connection.key.split('.') })
+
+      // A node with the same key exists in both graphs, but the type has changed
+      // (eg osc -> gain) so we need to recreate the node.
+      } else if (oldNode.type !== newNode.type) {
+        patches.updated.push({ type: 'node', key: newNode.key, data: newNode })
+
+        newNode.connections.forEach(connection => {
+          patches.created.push({ type: 'connection', key: newNode.key, data: connection.key.split('.') })
         })
-      } else if (nodeA.type !== nodeB.type) {
-        // The key is the same, but the type of node has changed
-        patches.updated.push({ type: 'node', key: nodeA.key, data: nodeB })
-        nodeB.connections.forEach(connection => {
-          patches.created.push({ type: 'connection', key: nodeB.key, data: connection.key.split('.') })
-        })
+
+      // A node with the same key exists in both graphs and the node hasn't
+      // fundamentally changed, so now we check whether properties or connections
+      // have changed.
       } else {
-        // The node hasn't fundamentally changed, time to check if
-        // its properties or connections has changed.
-        // First, check properties...
-        for (let j = 0; j < Math.max(nodeA.properties.length, nodeB.properties.length); j++) {
-          const propA = nodeA.properties[j]
-          const propB = nodeB.properties[j]
+        // Checking properties...
+        for (let j = 0; j < Math.max(oldNode.properties.length, newNode.properties.length); j++) {
+          const oldProp = oldNode.properties[j]
+          const newProp = newNode.properties[j]
 
           //
-          if (!propA) {
-            patches.created.push({ type: 'property', key: nodeA.key, data: propB })
-          } else if (!propB) {
-            patches.removed.push({ type: 'property', key: nodeA.key, data: propA })
-          } else if (propA.label !== propB.label) {
-            patches.removed.push({ type: 'property', key: nodeA.key, data: propA })
-            patches.created.push({ type: 'property', key: nodeA.key, data: propB })
-          } else if (propA.value !== propB.value) {
-            patches.updated.push({ type: 'property', key: nodeA.key, data: propB })
+          if (!oldProp) {
+            patches.created.push({ type: 'property', key: oldNode.key, data: newProp })
+          } else if (!newProp) {
+            patches.removed.push({ type: 'property', key: oldNode.key, data: oldProp })
+          } else if (oldProp.label !== newProp.label) {
+            patches.removed.push({ type: 'property', key: oldNode.key, data: oldProp })
+            patches.created.push({ type: 'property', key: oldNode.key, data: newProp })
+          } else if (oldProp.value !== newProp.value) {
+            patches.updated.push({ type: 'property', key: oldNode.key, data: newProp })
           }
         }
 
-        // Then, check connections...
-        for (let j = 0; j < Math.max(nodeA.connections.length, nodeB.connections.length); j++) {
-          const connectionA = nodeA.connections[j]
-          const connectionB = nodeB.connections[j]
+        // Checking connections...
+        for (let j = 0; j < Math.max(oldNode.connections.length, newNode.connections.length); j++) {
+          const oldConnection = oldNode.connections[j]
+          const newConnection = newNode.connections[j]
 
           //
-          if (!connectionA) {
-            patches.created.push({ type: 'connection', key: nodeA.key, data: connectionB.key.split('.') })
-          } else if (!connectionB) {
-            patches.removed.push({ type: 'connection', key: nodeA.key, data: connectionA.key.split('.') })
-          } else if (connectionA.key !== connectionB.key) {
-            patches.removed.push({ type: 'connection', key: nodeA.key, data: connectionA.key.split('.') })
-            patches.created.push({ type: 'connection', key: nodeA.key, data: connectionB.key.split('.') })
+          if (!oldConnection) {
+            patches.created.push({ type: 'connection', key: oldNode.key, data: newConnection.key.split('.') })
+          } else if (!newConnection) {
+            patches.removed.push({ type: 'connection', key: oldNode.key, data: oldConnection.key.split('.') })
+          } else if (oldConnection.key !== newConnection.key) {
+            patches.removed.push({ type: 'connection', key: oldNode.key, data: oldConnection.key.split('.') })
+            patches.created.push({ type: 'connection', key: oldNode.key, data: newConnection.key.split('.') })
           }
         }
       }
+
+      delete oldNodes[newNode.key]
+    }
+
+    for (const oldNode of Object.values(oldNodes)) {
+      patches.removed.push({ type: 'node', key: oldNode.key, data: oldNode })
     }
 
     return patches
   }
 
-  // PUBLIC METHODS =========================================================
-
+  // Constructor ===============================================================
   //
   constructor (context = new AudioContext(), opts = {}) {
-    // Borrowing a convetion from virtual dom libraries, the $ sign
-    // is used to indicate "real" Web Audio bits, and the v- prefix
-    // is used to indicate virtual elements.
+    // Borrowing a convetion from virtual dom libraries, the $ sign //is used to
+    // indicate "real" Web Audio bits, and the v- prefix is used to indicate
+    // virtual elements.
 
-    // $context is a reference to the `AudioContext` either passed in
-    // or created on construction.
+    // $context is a reference to the `AudioContext` either passed in or created
+    // on construction.
     this.$context = context
     // A reference to the real graph of audio nodes
     this.$nodes = {}
-    // We keep track of the prebious graph so we can perform a diff
-    // and work out what has changed between updates.
-    this.vPrev = []
+    // We keep track of the prebious graph so we can perform a diff and work out
+    // what has changed between updates.
+    this.vPrev = {}
 
-    // In most modern browsers an Audio Context starts in a
-    // suspended state and requires some user interaction
-    // before it can be resumed. Still, we can attempt to
-    // resume the context ourselves in the developer passes
-    // in the `autostart` option.
+    // In most modern browsers an Audio Context starts in a suspended state and
+    // requires some user interaction before it can be resumed. Still, we can
+    // attempt to resume the context ourselves in the developer passes in the
+    // `autostart` option.
     if (opts.autostart) this.resume()
   }
 
+  // Public Methods ============================================================
   //
   update (vGraph = []) {
     // The accompanying library of virtual node functions
@@ -230,8 +229,7 @@ export class VirtualAudioGraph {
     this.$context.resume()
   }
 
-  // PRIVATE METHODS ========================================================
-
+  // Private Methods ===========================================================
   //
   _createNode (key, { type, properties }) {
     let $node = null
@@ -307,6 +305,10 @@ export class VirtualAudioGraph {
       case 'WaveShaperNode':
         $node = this.$context.createWaveShaper()
         break
+      //
+      default:
+        console.warn(`Invalide node type of: ${type}. Defaulting to GainNode to avoid crashing the AudioContext.`)
+        $node = this.$context.createGain()
     }
 
     this.$nodes[key] = $node
@@ -314,10 +316,9 @@ export class VirtualAudioGraph {
     //
     properties.forEach(prop => this._setProperty(key, prop))
 
-    // Certain nodes like oscillators must be started before
-    // they will produce noise. We make the assumption that
-    // these nodes should always start immediately after they
-    // have been created, so if a `start` method exists we
+    // Certain nodes like oscillators must be started before they will produce
+    // noise. We make the assumption that these nodes should always start
+    // immediately after they have been created, so if a `start` method exists we
     // call it.
     if ($node.start) $node.start()
   }
@@ -326,9 +327,15 @@ export class VirtualAudioGraph {
   _destroyNode (key) {
     const $node = this.$nodes[key]
 
+    // Certain nodes like oscillators can be stopped. It probably doesn't make
+    // much of a difference calling this method, but we do just in case!
     if ($node.stop) $node.stop()
+
+    // Calling disconnect with no arguments will disconnect this node from
+    // everything.
     $node.disconnect()
 
+    // Finally remove the node from the graph and let the GC do its job.
     delete this.$nodes[key]
   }
 

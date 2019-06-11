@@ -2,7 +2,7 @@ module WebAudio exposing
     ( Node(..), Type, Key, Graph
     , node, ref, key
     , analyser, audioBufferSource, audioDestination, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, dac, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, panner, stereoPanner, waveShaper
-    , encode
+    , encode, encodeGraph
     )
 
 {-|
@@ -439,3 +439,10 @@ encode n =
                 [ ( "key", Encode.string k )
                 , ( "type", Encode.string "RefNode" )
                 ]
+
+{-| Encode a graph of nodes into a Json value. More than likely you'll
+use this more than `encode` 
+-}
+encodeGraph : Graph -> Encode.Value
+encodeGraph =
+  Encode.list encode

@@ -1,5 +1,4 @@
-import { defer } from '../utils'
-
+const defer = f => setTimeout(f, 0)
 const AudioContext = window.AudioContext || window.webkitAudioContext
 
 export default class VirtualAudioGraph {
@@ -348,7 +347,7 @@ export default class VirtualAudioGraph {
         $node[label] = value
         break
       case 'AudioParam':
-        $node[label].value = value
+        $node[label].linearRampToValueAtTime(value, this.$context.currentTime + 0.01)
         break
       case 'ScheduledAudioParam':
         $node[label][value.method](value.target, value.time)

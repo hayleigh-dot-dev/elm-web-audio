@@ -1,6 +1,6 @@
 /* global AudioContext */
 import { Elm } from './Main.elm'
-import { VirtualAudioGraph } from './virtual-audio'
+import VirtualAudioGraph from './virtual-audio'
 
 const context = new AudioContext()
 const audio = new VirtualAudioGraph(context)

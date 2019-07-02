@@ -5,4 +5,4 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 },{}],"epB2":[function(require,module,exports) {
 "use strict";var e=require("./Main.elm"),t=u(require("./virtual-audio"));function u(e){return e&&e.__esModule?e:{default:e}}var n=new AudioContext,i=new t.default(n);window.addEventListener("click",function(){"suspended"===n.state&&n.resume()});var r=e.Elm.Main.init({node:document.querySelector("#app")});r.ports.updateAudio.subscribe(function(e){i.update(e)});
 },{"./Main.elm":"8asW","./virtual-audio":"yZDR"}]},{},["epB2"], null)
-//# sourceMappingURL=elm-web-audio/main.2ad78863.js.map
+//# sourceMappingURL=/elm-web-audio/main.2ad78863.js.map

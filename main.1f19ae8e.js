@@ -5673,6 +5673,7 @@ var author$project$WebAudio$encode = function (n) {
 					]));
 	}
 };
+var author$project$WebAudio$encodeGraph = elm$json$Json$Encode$list(author$project$WebAudio$encode);
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5744,9 +5745,7 @@ var elm$core$List$map = F2(
 	});
 var author$project$Main$audio = function (model) {
 	return author$project$Main$updateAudio(
-		A2(
-			elm$json$Json$Encode$list,
-			author$project$WebAudio$encode,
+		author$project$WebAudio$encodeGraph(
 			A2(elm$core$List$map, author$project$Main$voice, model.notes)));
 };
 var author$project$Main$initialModel = {
@@ -5755,7 +5754,7 @@ var author$project$Main$initialModel = {
 			{key: 'a', midi: 60, triggered: false},
 			{key: 's', midi: 62, triggered: false},
 			{key: 'd', midi: 64, triggered: false},
-			{key: 'f', midi: 66, triggered: false},
+			{key: 'f', midi: 65, triggered: false},
 			{key: 'g', midi: 67, triggered: false},
 			{key: 'h', midi: 69, triggered: false},
 			{key: 'j', midi: 71, triggered: false},
@@ -5773,7 +5772,6 @@ var author$project$Main$init = function (_n0) {
 		author$project$Main$initialModel,
 		author$project$Main$audio(author$project$Main$initialModel));
 };
-var author$project$Main$NoOp = {$: 'NoOp'};
 var author$project$Main$NoteOff = function (a) {
 	return {$: 'NoteOff', a: a};
 };
@@ -5799,6 +5797,7 @@ var elm$core$List$any = F2(
 		}
 	});
 var elm$json$Json$Decode$andThen = _Json_andThen;
+var elm$json$Json$Decode$fail = _Json_fail;
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$string = _Json_decodeString;
 var elm$json$Json$Decode$succeed = _Json_succeed;
@@ -5816,7 +5815,7 @@ var author$project$Main$noteOffDecoder = function (notes) {
 				return elm$json$Json$Decode$succeed(
 					author$project$Main$NoteOff(key));
 			} else {
-				return elm$json$Json$Decode$succeed(author$project$Main$NoOp);
+				return elm$json$Json$Decode$fail('');
 			}
 		},
 		A2(elm$json$Json$Decode$field, 'key', elm$json$Json$Decode$string));
@@ -5838,7 +5837,7 @@ var author$project$Main$noteOnDecoder = function (notes) {
 				return elm$json$Json$Decode$succeed(
 					author$project$Main$NoteOn(key));
 			} else {
-				return elm$json$Json$Decode$succeed(author$project$Main$NoOp);
+				return elm$json$Json$Decode$fail('');
 			}
 		},
 		A2(elm$json$Json$Decode$field, 'key', elm$json$Json$Decode$string));
@@ -10242,6 +10241,34 @@ var author$project$Main$noteOn = F2(
 					model.notes)
 			});
 	});
+var author$project$Main$transposeDown = function (model) {
+	return _Utils_update(
+		model,
+		{
+			notes: A2(
+				elm$core$List$map,
+				function (note) {
+					return _Utils_update(
+						note,
+						{midi: note.midi - 1});
+				},
+				model.notes)
+		});
+};
+var author$project$Main$transposeUp = function (model) {
+	return _Utils_update(
+		model,
+		{
+			notes: A2(
+				elm$core$List$map,
+				function (note) {
+					return _Utils_update(
+						note,
+						{midi: note.midi + 1});
+				},
+				model.notes)
+		});
+};
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -10256,7 +10283,7 @@ var author$project$Main$update = F2(
 						author$project$Main$audio(m));
 				}(
 					A2(author$project$Main$noteOn, key, model));
-			default:
+			case 'NoteOff':
 				var key = msg.a;
 				return function (m) {
 					return A2(
@@ -10265,7 +10292,57 @@ var author$project$Main$update = F2(
 						author$project$Main$audio(m));
 				}(
 					A2(author$project$Main$noteOff, key, model));
+			case 'TransposeUp':
+				return function (m) {
+					return A2(
+						elm$core$Tuple$pair,
+						m,
+						author$project$Main$audio(m));
+				}(
+					author$project$Main$transposeUp(model));
+			default:
+				return function (m) {
+					return A2(
+						elm$core$Tuple$pair,
+						m,
+						author$project$Main$audio(m));
+				}(
+					author$project$Main$transposeDown(model));
 		}
+	});
+var author$project$Main$TransposeDown = {$: 'TransposeDown'};
+var author$project$Main$TransposeUp = {$: 'TransposeUp'};
+var elm$html$Html$pre = _VirtualDom_node('pre');
+var author$project$Main$audioView = elm$core$List$map(
+	function (note) {
+		return function (json) {
+			return A2(
+				elm$html$Html$pre,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('text-xs'),
+						elm$html$Html$Attributes$class(
+						note.triggered ? 'text-gray-800' : 'text-gray-400')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$code,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('my-2')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text(json)
+							]))
+					]));
+		}(
+			A2(
+				elm$json$Json$Encode$encode,
+				2,
+				author$project$WebAudio$encode(
+					author$project$Main$voice(note))));
 	});
 var author$project$Main$noteCSS = function (active) {
 	return active ? 'bg-indigo-500 text-white font-bold py-2 px-4 rounded' : 'bg-indigo-100 text-black font-bold py-2 px-4 rounded';
@@ -10284,30 +10361,89 @@ var author$project$Main$noteView = function (note) {
 				elm$html$Html$text(note.key)
 			]));
 };
+var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$main_ = _VirtualDom_node('main');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$main_,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('mx-10 my-10')
+				elm$html$Html$Attributes$class('m-10')
 			]),
 		_List_fromArray(
 			[
+				A2(
+				elm$html$Html$h1,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('text-3xl my-10')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('elm-web-audio')
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('p-2 my-10')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$TransposeUp),
+								elm$html$Html$Attributes$class('bg-indigo-500 text-white font-bold py-2 px-4 mr-4 rounded')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Transpose up')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$TransposeDown),
+								elm$html$Html$Attributes$class('bg-indigo-500 text-white font-bold py-2 px-4 rounded')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Transpose down')
+							]))
+					])),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$class('flex')
 					]),
-				A2(elm$core$List$map, author$project$Main$noteView, model.notes))
+				A2(elm$core$List$map, author$project$Main$noteView, model.notes)),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('p-2 my-10')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('\n            Below is the json send via ports to javascript. Active notes\n            are highlighted.\n        ')
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('bg-gray-200 p-2 my-10 rounded')
+					]),
+				author$project$Main$audioView(model.notes))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"NoOp":[],"NoteOn":["String.String"],"NoteOff":["String.String"]}},"String.String":{"args":[],"tags":{"String":[]}}}}})}});
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"NoOp":[],"NoteOn":["String.String"],"NoteOff":["String.String"],"TransposeUp":[],"TransposeDown":[]}},"String.String":{"args":[],"tags":{"String":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -11389,7 +11525,7 @@ var App = _Main.Elm.Main.init({
 App.ports.updateAudio.subscribe(function (graph) {
   audio.update(graph);
 });
-},{"./Main.elm":"Main.elm","./virtual-audio":"virtual-audio.js"}],"../../../../.nvm/versions/node/v11.14.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./Main.elm":"Main.elm","./virtual-audio":"virtual-audio.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -11417,7 +11553,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36431" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35973" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -11592,5 +11728,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../.nvm/versions/node/v11.14.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
 //# sourceMappingURL=/main.1f19ae8e.js.map

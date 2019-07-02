@@ -1,15 +1,18 @@
 module WebAudio.Context exposing
-  (AudioContext, State(..)
+  ( AudioContext, State(..)
   , currentTime, sampleRate, state, baseLatency, outputLatency
   , every
   )
 
 {-|
 
+# Types
 @docs AudioContext, State
 
+# AudioContext Property Accessors
 @docs currentTime, sampleRate, state, baseLatency, outputLatency
 
+# Subscriptions
 @docs every
 
 -}

@@ -11,10 +11,8 @@ module WebAudio exposing
 # Types
 @docs Node, Type, Key, Graph
 
-
 # Basic Constructors
 @docs node, ref, key
-
 
 # Web Audio Nodes
 ## Common audio nodes
@@ -25,7 +23,6 @@ module WebAudio exposing
 
 ## Signal processing nodes
 @docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
-
 
 # JSON Encoding
 To turn the json in Web Audio nodes, you need to know what that data looks like.
@@ -69,14 +66,14 @@ Here's a breakdown of how everything is encoded:
 }
 ```
 
-Properties can come in two types, AudioParam and NodeProperty. While the Web
-Audio API doesn't make an official distinction between the two, how they are used
-differs.
+Properties can come in two types, AudioParam and NodeProperty. While the Web 
+Audio API doesn't make an official distinction between the two, how they are 
+used differs.
 
-AudioParams represent parameters that can be updated at either audio rate (a-rate)
-or control rate (k-rate). Other audio nodes can connect to an AudioParam and
-modulate its value in real time. Examples of AudioParams include frequency, gain,
-and delayTime.
+AudioParams represent parameters that can be updated at either audio rate 
+(a-rate) or control rate (k-rate). Other audio nodes can connect to an 
+AudioParam and modulate its value in real time. Examples of AudioParams include 
+frequency, gain, and delayTime.
 
 **AudioParam:**
 
@@ -88,8 +85,8 @@ and delayTime.
 }
 ```
 
-NodeProperties are any other parameter on an audio node. An example of a NodeProperty
-is an OscillatorNode's "type" parameter.
+NodeProperties are any other parameter on an audio node. An example of a 
+NodeProperty is an OscillatorNode's "type" parameter.
 
 **NodeProperty:**
 
@@ -111,10 +108,9 @@ import Json.Encode as Encode exposing (encode)
 import WebAudio.Property as Property exposing (..)
 
 -- Types -----------------------------------------------------------------------
-{-| The core building block of any Web Audio signal
-graph. `Keyed` nodes are just like regular nodes but
-with an additonal `Key` property. This allows `Ref` nodes
-to reference them elsewhere in the graph!
+{-| The core building block of any Web Audio signal graph. `Keyed` nodes are 
+just like regular nodes but with an additonal `Key` property. This allows `Ref` 
+nodes to reference them elsewhere in the graph!
 -}
 type Node
     = Node Type (List Property) (List Node)
@@ -122,16 +118,15 @@ type Node
     | Ref Key
 
 
-{-| A simple type alias representing the type of `Node`. This
-could be something like "OscillatorNode" or "RefNode".
+{-| A simple type alias representing the type of `Node`. This could be 
+something like "OscillatorNode" or "RefNode".
 -}
 type alias Type =
     String
 
 
-{-| A simple type alias representing unique key used to identify
-nodes. Use `Key`s like you would use the `id` attribute on a HTML
-element.
+{-| A simple type alias representing unique key used to identify nodes. Use 
+`Key`s like you would use the `id` attribute on a HTML element.
 -}
 type alias Key =
     String
@@ -143,10 +138,9 @@ type alias Graph =
 
 
 -- Node constructors -----------------------------------------------------------
-{-| General way to construct Web Audio nodes. This is used
-to create all the helper functions below. You can use this
-function to define custom nodes by partially applying just
-the `type` parameter. This is handy if you're using a
+{-| General way to construct Web Audio nodes. This is used to create all the 
+helper functions below. You can use this function to define custom nodes by 
+partially applying just the `type` parameter. This is handy if you're using a 
 library like Tone.js and want to use those nodes in Elm.
 
     omniOscillator : List Property -> List Node -> Node
@@ -164,18 +158,17 @@ node =
     Node
 
 
-{-| A ref node is used to refer to a keyed node elsewhere in
-the graph. This is how we connect multiple "chains" of nodes
-together and represet a graph in a simple list.
+{-| A ref node is used to refer to a keyed node elsewhere in the graph. This is 
+how we connect multiple "chains" of nodes together and represet a graph in a 
+simple list.
 -}
 ref : Key -> Node
 ref =
     Ref
 
 
-{-| Use this function to apply a key to a node. In the case
-of already keyed nodes, or ref nodes, this will update the
-key to the new value.
+{-| Use this function to apply a key to a node. In the case of already keyed 
+nodes, or ref nodes, this will update the key to the new value.
 
     a = osc [ Property.freq 440 ] [ dac ]
     b = keyedGain "b" [ Property.gain 0.5 ] [ dac ]
@@ -393,8 +386,8 @@ waveShaper =
 
 
 -- JSON encoding ---------------------------------------------------------------
-{-| Converts a `Node` into a Json value. Use this to send a node through
-a port to javascipt, where it can be constructed into a Web Audio node!
+{-| Converts a `Node` into a Json value. Use this to send a node through a port 
+to javascipt, where it can be constructed into a Web Audio node!
 -}
 encode : Node -> Encode.Value
 encode n =
@@ -421,8 +414,8 @@ encode n =
                 ]
 
 
-{-| Encode a graph of nodes into a Json value. More than likely you'll
-use this more than `encode`
+{-| Encode a graph of nodes into a Json value. More than likely you'll use this 
+more than `encode`
 -}
 encodeGraph : Graph -> Encode.Value
 encodeGraph =

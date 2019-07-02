@@ -3,15 +3,14 @@ port module Main exposing (..)
 import Browser
 import Browser.Events
 --
-import Html exposing (Html, Attribute)
-import Html.Attributes
-import Html.Events
+import Html exposing (Html, Attribute, div, pre, code, h1, text, main_, button)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 --
 import Json.Decode
 import Json.Encode
 --
 import WebAudio
-import WebAudio.Keyed as Keyed
 import WebAudio.Property as Prop
 
 -- Send the JSON encoded audio graph to javascript
@@ -47,7 +46,7 @@ initialModel =
     [ { key = "a", midi = 60, triggered = False }
     , { key = "s", midi = 62, triggered = False }
     , { key = "d", midi = 64, triggered = False }
-    , { key = "f", midi = 66, triggered = False }
+    , { key = "f", midi = 65, triggered = False }
     , { key = "g", midi = 67, triggered = False }
     , { key = "h", midi = 69, triggered = False }
     , { key = "j", midi = 71, triggered = False }
@@ -67,6 +66,9 @@ type Msg
   --
   | NoteOn String
   | NoteOff String
+  --
+  | TransposeUp
+  | TransposeDown
 
 --
 noteOn : String -> Model -> Model
@@ -82,6 +84,18 @@ noteOff key model =
   | notes = List.map (\note -> if note.key == key then { note | triggered = False } else note) model.notes 
   }
 
+transposeUp : Model -> Model
+transposeUp model =
+  { model
+  | notes = List.map (\note -> { note | midi = note.midi + 1 }) model.notes
+  }
+
+transposeDown : Model -> Model
+transposeDown model =
+  { model
+  | notes = List.map (\note -> { note | midi = note.midi - 1 }) model.notes
+  }
+
 --
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -95,6 +109,12 @@ update msg model =
     NoteOff key ->
       noteOff key model |> (\m -> Tuple.pair m (audio m))
 
+    TransposeUp ->
+      transposeUp model |> (\m -> Tuple.pair m (audio m))
+
+    TransposeDown ->
+      transposeDown model |> (\m -> Tuple.pair m (audio m))
+
 -- AUDIO ----------------------------------------------------------------------
 -- Super simple utility function that takes a MIDI note number like 60 and
 -- converts it to the corresponding frequency in Hertz. We use Float for the
@@ -105,9 +125,6 @@ mtof midi =
   440 * 2 ^ ((midi - 69) / 12)
 
 -- This takes a Note (as defined above) and converts that to a synth voice.
--- TODO:
--- [ ] Add a simple WebAudio.biquadFilter node.
--- [ ] Build a simple ADSR (need to grab the audiocontext time from js for this)
 voice : Note -> WebAudio.Node
 voice note =
   WebAudio.oscillator [ Prop.frequency <| mtof note.midi ]
@@ -123,7 +140,7 @@ voice note =
 audio : Model -> Cmd Msg
 audio model =
   List.map voice model.notes
-    |> Json.Encode.list WebAudio.encode
+    |> WebAudio.encodeGraph
     |> updateAudio
 
 -- VIEW -----------------------------------------------------------------------
@@ -136,23 +153,46 @@ noteCSS active =
   else
     "bg-indigo-100 text-black font-bold py-2 px-4 rounded"
 
--- This takes a Note (as defined above) and converts that to some Html. Notice
+-- This takes a Note (as defined above) and converts that to some  Notice
 -- how we use the data for both the `voice` function and this `noteView` function.
 -- Our audio graph should never become out of sync with our view!
 noteView : Note -> Html Msg
 noteView note =
-  Html.div 
-    [ Html.Attributes.class <| noteCSS note.triggered 
-    , Html.Attributes.class "flex-1 mx-2 text-center"
-    ]
-    [ Html.text note.key ]
+  div [ class <| noteCSS note.triggered, class "flex-1 mx-2 text-center" ]
+    [ text note.key ]
+
+audioView : List Note -> List (Html Msg)
+audioView =
+  List.map (\note ->
+    voice note |> WebAudio.encode |> Json.Encode.encode 2 |> (\json ->
+      pre [ class "text-xs", class <| if note.triggered then "text-gray-800" else "text-gray-400" ] 
+        [ code [ class "my-2" ] 
+          [ text json ] 
+        ]
+    )
+  )
 
 --
 view : Model -> Html Msg
 view model =
-  Html.main_ [ Html.Attributes.class "mx-10 my-10" ]
-    [ Html.div [ Html.Attributes.class "flex" ] <| 
-        List.map noteView model.notes
+  main_ [ class "m-10" ]
+    [ h1 [ class "text-3xl my-10" ]
+      [ text "elm-web-audio" ]
+    , div [ class "p-2 my-10" ]
+      [ button [ onClick TransposeUp, class "bg-indigo-500 text-white font-bold py-2 px-4 mr-4 rounded" ]
+          [ text "Transpose up" ]
+      , button [ onClick TransposeDown, class "bg-indigo-500 text-white font-bold py-2 px-4 rounded" ]
+          [ text "Transpose down" ]
+      ]
+    , div [ class "flex" ]
+        <| List.map noteView model.notes
+    , div [ class "p-2 my-10" ]
+        [ text """
+            Below is the json send via ports to javascript. Active notes
+            are highlighted.
+        """ ]
+    , div [ class "bg-gray-200 p-2 my-10 rounded"]
+        <| audioView model.notes
     ]
 
 -- SUBSCRIPTIONS --------------------------------------------------------------
@@ -165,7 +205,7 @@ noteOnDecoder notes =
         True ->
           Json.Decode.succeed (NoteOn key)
         False ->
-          Json.Decode.succeed NoOp
+          Json.Decode.fail ""
     )
 
 --
@@ -177,7 +217,7 @@ noteOffDecoder notes =
         True ->
           Json.Decode.succeed (NoteOff key)
         False ->
-          Json.Decode.succeed NoOp
+          Json.Decode.fail ""
     )
 
 --

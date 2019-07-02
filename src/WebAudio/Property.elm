@@ -1,136 +1,160 @@
-module WebAudio.Property exposing (..)
+module WebAudio.Property exposing
+    ( Property(..), Value, ScheduledUpdateMethod(..)
+    , bool, float, floatList, int, string
+    , nodeProperty, audioParam
+    , setValueAtTime, linearRampToValueAtTime, exponentialRampToValueAtTime
+    , attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve, delayTime, detune, distanceModel, encode, encodeScheduledUpdateMethod, encodeScheduledUpdateValue, fftSize, frequency, gain, knee, loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels, normalize, offset, orientationX, orientationY, orientationZ, oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant, threshold, type_
+    )
 
+{-|
+
+@docs Property, Value, ScheduledUpdateMethod
+
+@docs bool, float, floatList, int, string
+
+@docs nodeProperty, audioParam
+
+@docs setValueAtTime, linearRampToValueAtTime, exponentialRampToValueAtTime
+
+@docs attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve, delayTime, detune, distanceModel, encode, encodeScheduledUpdateMethod, encodeScheduledUpdateValue, fftSize, frequency, gain, knee, loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels, normalize, offset, orientationX, orientationY, orientationZ, oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant, threshold, type_
+
+
+-}
 
 import Json.Encode
 
 
-{-| -}
+{-| a
+-}
 type Property
-  = NodeProperty String Value
-  | AudioParam String Value
-  | ScheduledUpdate String 
-    { method : ScheduledUpdateMethod
-    , target : Value
-    , time : Float
-    }
+    = NodeProperty String Value
+    | AudioParam String Value
+    | ScheduledUpdate
+        String
+        { method : ScheduledUpdateMethod
+        , target : Value
+        , time : Float
+        }
 
 
 {-| -}
-type alias Value = Json.Encode.Value
+type alias Value =
+    Json.Encode.Value
 
 
+{-| -}
 type ScheduledUpdateMethod
-  = SetValueAtTime
-  | LinearRampToValueAtTime
-  | ExponentialRampToValueAtTime
+    = SetValueAtTime
+    | LinearRampToValueAtTime
+    | ExponentialRampToValueAtTime
 
 
 {-| -}
 bool : Bool -> Value
 bool =
-  Json.Encode.bool
+    Json.Encode.bool
 
 
 {-| -}
 float : Float -> Value
 float =
-  Json.Encode.float
+    Json.Encode.float
 
 
 {-| -}
 floatList : List Float -> Value
 floatList =
-  Json.Encode.list Json.Encode.float
+    Json.Encode.list Json.Encode.float
 
 
 {-| -}
 int : Int -> Value
-int = 
-  Json.Encode.int
+int =
+    Json.Encode.int
 
 
 {-| -}
 string : String -> Value
 string =
-  Json.Encode.string
+    Json.Encode.string
 
 
 {-| -}
 nodeProperty : String -> Value -> Property
 nodeProperty =
-  NodeProperty
+    NodeProperty
 
 
 {-| -}
 audioParam : String -> Value -> Property
 audioParam =
-  AudioParam 
+    AudioParam
 
 
 {-| -}
 setValueAtTime : Property -> Float -> Property
 setValueAtTime property time =
-  case property of
-    NodeProperty label value ->
-      ScheduledUpdate label 
-        { method = SetValueAtTime
-        , target = value
-        , time = time
-        }
+    case property of
+        NodeProperty label value ->
+            ScheduledUpdate label
+                { method = SetValueAtTime
+                , target = value
+                , time = time
+                }
 
-    AudioParam label value ->
-      ScheduledUpdate label
-        { method = SetValueAtTime
-        , target = value
-        , time = time
-        }
+        AudioParam label value ->
+            ScheduledUpdate label
+                { method = SetValueAtTime
+                , target = value
+                , time = time
+                }
 
-    ScheduledUpdate _ _ ->
-      property
+        ScheduledUpdate _ _ ->
+            property
 
 
 {-| -}
 linearRampToValueAtTime : Property -> Float -> Property
 linearRampToValueAtTime property time =
-  case property of
-    NodeProperty label value ->
-      ScheduledUpdate label 
-        { method = LinearRampToValueAtTime
-        , target = value
-        , time = time
-        }
+    case property of
+        NodeProperty label value ->
+            ScheduledUpdate label
+                { method = LinearRampToValueAtTime
+                , target = value
+                , time = time
+                }
 
-    AudioParam label value ->
-      ScheduledUpdate label
-        { method = LinearRampToValueAtTime
-        , target = value
-        , time = time
-        }
+        AudioParam label value ->
+            ScheduledUpdate label
+                { method = LinearRampToValueAtTime
+                , target = value
+                , time = time
+                }
 
-    ScheduledUpdate _ _ ->
-      property
+        ScheduledUpdate _ _ ->
+            property
 
 
 {-| -}
 exponentialRampToValueAtTime : Property -> Float -> Property
 exponentialRampToValueAtTime property time =
-  case property of
-    NodeProperty label value ->
-      ScheduledUpdate label 
-        { method = ExponentialRampToValueAtTime
-        , target = value
-        , time = time
-        }
+    case property of
+        NodeProperty label value ->
+            ScheduledUpdate label
+                { method = ExponentialRampToValueAtTime
+                , target = value
+                , time = time
+                }
 
-    AudioParam label value ->
-      ScheduledUpdate label
-        { method = ExponentialRampToValueAtTime
-        , target = value
-        , time = time
-        }
+        AudioParam label value ->
+            ScheduledUpdate label
+                { method = ExponentialRampToValueAtTime
+                , target = value
+                , time = time
+                }
 
-    ScheduledUpdate _ _ ->
-      property
+        ScheduledUpdate _ _ ->
+            property
 
 
 {-| -}
@@ -376,47 +400,48 @@ type_ =
 {-| -}
 encode : Property -> Value
 encode property =
-  case property of
-    NodeProperty label value ->
-      Json.Encode.object
-        [ ("type", Json.Encode.string "NodeProperty")
-        , ("label", Json.Encode.string label)
-        , ("value", value)
-        ]
+    case property of
+        NodeProperty label value ->
+            Json.Encode.object
+                [ ( "type", Json.Encode.string "NodeProperty" )
+                , ( "label", Json.Encode.string label )
+                , ( "value", value )
+                ]
 
-    AudioParam label value ->
-      Json.Encode.object
-        [ ("type", Json.Encode.string "AudioParam")
-        , ("label", Json.Encode.string label)
-        , ("value", value)
-        ]
+        AudioParam label value ->
+            Json.Encode.object
+                [ ( "type", Json.Encode.string "AudioParam" )
+                , ( "label", Json.Encode.string label )
+                , ( "value", value )
+                ]
+
+        ScheduledUpdate label value ->
+            Json.Encode.object
+                [ ( "type", Json.Encode.string "ScheduledUpdate" )
+                , ( "label", Json.Encode.string label )
+                , ( "value", encodeScheduledUpdateValue value )
+                ]
 
 
-    ScheduledUpdate label value ->
-      Json.Encode.object
-        [ ("type", Json.Encode.string "ScheduledUpdate")
-        , ("label", Json.Encode.string label)
-        , ("value", encodeScheduledUpdateValue value)
-        ]
-
-
+{-| -}
 encodeScheduledUpdateValue : { method : ScheduledUpdateMethod, target : Value, time : Float } -> Value
 encodeScheduledUpdateValue { method, target, time } =
-  Json.Encode.object
-    [ ("method", encodeScheduledUpdateMethod method)
-    , ("target", target)
-    , ("time", Json.Encode.float time)
-    ]
+    Json.Encode.object
+        [ ( "method", encodeScheduledUpdateMethod method )
+        , ( "target", target )
+        , ( "time", Json.Encode.float time )
+        ]
 
 
+{-| -}
 encodeScheduledUpdateMethod : ScheduledUpdateMethod -> Value
 encodeScheduledUpdateMethod method =
-  case method of
-    SetValueAtTime ->
-      Json.Encode.string "setValueAtTime"
+    case method of
+        SetValueAtTime ->
+            Json.Encode.string "setValueAtTime"
 
-    LinearRampToValueAtTime ->
-      Json.Encode.string "linearRampToValueAtTime"
+        LinearRampToValueAtTime ->
+            Json.Encode.string "linearRampToValueAtTime"
 
-    ExponentialRampToValueAtTime ->
-      Json.Encode.string "exponentialRampToValueAtTime"
+        ExponentialRampToValueAtTime ->
+            Json.Encode.string "exponentialRampToValueAtTime"

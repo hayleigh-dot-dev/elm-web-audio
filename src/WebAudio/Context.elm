@@ -129,7 +129,39 @@ outputLatency context =
     Err _ -> 0
 
 -- Subscriptions ---------------------------------------------------------------
-{-|
+{-| This function works like Time.every, and allows us to get an AudioContext's
+current time according to some interval. There are some important differences
+between this and Time.every, however.
+
+In javascript land setInterval can be hugely inconsistent, making musical timing
+difficult as the interval drifts over time. To combat this we can combine setInterval
+with a short interval and an AudioContext to look ahead in time, making it possible
+to schedule sample-accurate updates.
+
+Because of this, the AudioContext time returned by `every` will usually be a few
+milliseconds in the future. This works great when combined with scheduled parameter
+updates!
+
+    type alias Model = 
+      { time : Float
+      , context : AudioContext
+      , freq : Float
+      , ...
+      }
+
+    type Msg
+      = NextStep Float
+      | ...
+
+    audio model =
+      osc [ setValueAtTime (freq model.freq) model.time ] 
+        [ dac ]
+
+    ...
+
+    -- Every 250ms move to the next step in a sequencer.  
+    subscriptions model =
+      every 0.25 model.time NextStep model.context
 -}
 every : Float -> Float -> (Float -> msg) -> AudioContext -> Sub msg
 every interval prev msg context =

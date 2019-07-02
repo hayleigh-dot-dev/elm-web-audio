@@ -1,30 +1,33 @@
 module WebAudio exposing
-    ( Node(..), Type, Key, Graph
+    ( Node, Type, Key, Graph
     , node, ref, key
-    , analyser, audioBufferSource, audioDestination, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, dac, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, panner, stereoPanner, waveShaper
+    , oscillator, osc, gain, audioDestination, dac, audioBufferSource, delay
+    , channelMerger, channelSplitter, constantSource
+    , biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
     , encode, encodeGraph
     )
 
 {-|
-
-
 # Types
-
 @docs Node, Type, Key, Graph
 
 
 # Basic Constructors
-
 @docs node, ref, key
 
 
 # Web Audio Nodes
+## Common audio nodes
+@docs oscillator, osc, gain, audioDestination, dac, audioBufferSource, delay
 
-@docs analyser, audioBufferSource, audioDestination, biquadFilter, channelMerger, channelSplitter, constantSource, convolver, dac, delay, dynamicsCompressor, gain, iirFilter, oscillator, osc, panner, stereoPanner, waveShaper
+## Utility nodes
+@docs channelMerger, channelSplitter, constantSource
+
+## Signal processing nodes
+@docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
 
 
 # JSON Encoding
-
 To turn the json in Web Audio nodes, you need to know what that data looks like.
 Here's a breakdown of how everything is encoded:
 
@@ -98,15 +101,16 @@ is an OscillatorNode's "type" parameter.
 }
 ```
 
-@docs encode
+@docs encode, encodeGraph
 
 -}
 
+-- Imports ---------------------------------------------------------------------
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (encode)
 import WebAudio.Property as Property exposing (..)
 
-
+-- Types -----------------------------------------------------------------------
 {-| The core building block of any Web Audio signal
 graph. `Keyed` nodes are just like regular nodes but
 with an additonal `Key` property. This allows `Ref` nodes
@@ -138,6 +142,7 @@ type alias Graph =
     List Node
 
 
+-- Node constructors -----------------------------------------------------------
 {-| General way to construct Web Audio nodes. This is used
 to create all the helper functions below. You can use this
 function to define custom nodes by partially applying just
@@ -193,32 +198,16 @@ key k n =
         Ref _ ->
             Ref k
 
-
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode>
-
-Common properties:
-
-    - fftSize
-    - minDecibels
-    - maxDecibels
-    - smoothingTimeConstant
-
--}
-analyser : List Property -> List Node -> Node
-analyser =
-    Node "AnalyserNode"
-
-
+-- Audio nodes -----------------------------------------------------------------
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
-
 Common properties:
 
-    - buffer
-    - detune
-    - loop
-    - loopStart
-    - loopEnd
-    - playbackRate
+  - buffer
+  - detune
+  - loop
+  - loopStart
+  - loopEnd
+  - playbackRate
 
 -}
 audioBufferSource : List Property -> List Node -> Node
@@ -234,7 +223,6 @@ audioDestination =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
-
 Common properties:
 
   - frequency
@@ -263,7 +251,6 @@ channelSplitter =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
-
 Common properties:
 
   - offset
@@ -275,7 +262,6 @@ constantSource =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
-
 Common properties:
 
   - buffer
@@ -295,7 +281,6 @@ dac =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
-
 Common properties:
 
   - delayTime
@@ -307,7 +292,6 @@ delay =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
-
 Common properties:
 
   - threshold
@@ -324,7 +308,6 @@ dynamicsCompressor =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
-
 Common properties:
 
   - gain
@@ -343,7 +326,6 @@ iirFilter =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
-
 Common properties:
 
   - frequency
@@ -364,7 +346,6 @@ osc =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
-
 Common properties:
 
   - coneInnerAngle
@@ -389,7 +370,6 @@ panner =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
-
 Common properties:
 
   - pan
@@ -401,7 +381,6 @@ stereoPanner =
 
 
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
-
 Common properties:
 
   - curve
@@ -413,6 +392,7 @@ waveShaper =
     Node "WaveShaperNode"
 
 
+-- JSON encoding ---------------------------------------------------------------
 {-| Converts a `Node` into a Json value. Use this to send a node through
 a port to javascipt, where it can be constructed into a Web Audio node!
 -}
@@ -440,9 +420,10 @@ encode n =
                 , ( "type", Encode.string "RefNode" )
                 ]
 
+
 {-| Encode a graph of nodes into a Json value. More than likely you'll
-use this more than `encode` 
+use this more than `encode`
 -}
 encodeGraph : Graph -> Encode.Value
 encodeGraph =
-  Encode.list encode
+    Encode.list encode

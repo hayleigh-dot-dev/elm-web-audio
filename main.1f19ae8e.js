@@ -10330,7 +10330,7 @@ var author$project$Main$audioView = elm$core$List$map(
 					[
 						elm$html$Html$Attributes$class('text-xs'),
 						elm$html$Html$Attributes$class(
-						note.triggered ? 'text-gray-800' : 'text-gray-400')
+						note.triggered ? 'text-gray-800' : 'text-gray-500')
 					]),
 				_List_fromArray(
 					[
@@ -10391,20 +10391,51 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$text('elm-web-audio')
 					])),
 				A2(
-				elm$html$Html$div,
+				elm$html$Html$p,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('p-2 my-10')
+						elm$html$Html$Attributes$class('p-2 my-6')
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Click anywhere to resume the audio context.')
+						elm$html$Html$text('This package provides an elm/html-like API for declaring Web \n          Audio graphs in Elm. The intention being that these `virtual` audio \n          graphs are then sent via a port to be constructed by a javascript. \n          There is a reference implementation of this found in the repository \n          that you are free to copy until I or someone else releases a package \n          formally.')
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('p-2 my-6')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('This site primarily serves as a demonstration that the library\n          actually works. If you\'d like some more in depth documentation on the\n          Elm library itself you should check out the package '),
+						A2(
+						elm$html$Html$a,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$href('https://package.elm-lang.org/packages/pd-andy/elm-web-audio/1.0.0/'),
+								elm$html$Html$Attributes$class('text-indigo-500 hover:text-indigo-700')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('here.')
+							]))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('p-2 my-6')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('A Web Audio context typically starts in a suspended state. \n          If you can\'t hear any sound, click anywhere to resume the audio \n          context.')
 					])),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('p-2 my-10')
+						elm$html$Html$Attributes$class('p-2 my-6')
 					]),
 				_List_fromArray(
 					[
@@ -10446,13 +10477,13 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('\n            Below is the json send via ports to javascript. Active notes\n            are highlighted.\n        ')
+						elm$html$Html$text('Below is the json send via ports to javascript. Active notes \n          are highlighted.')
 					])),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('bg-gray-200 p-2 my-10 rounded')
+						elm$html$Html$Attributes$class('bg-gray-200 p-2 my-10 rounded h-64 overflow-scroll')
 					]),
 				author$project$Main$audioView(model.notes))
 			]));
@@ -11571,7 +11602,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63562" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65029" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

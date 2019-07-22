@@ -3,8 +3,8 @@ port module Main exposing (..)
 import Browser
 import Browser.Events
 --
-import Html exposing (Html, Attribute, div, pre, code, h1, text, main_, button)
-import Html.Attributes exposing (class)
+import Html exposing (Html, Attribute, a, div, pre, p, code, h1, text, main_, button)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 --
 import Json.Decode
@@ -165,7 +165,7 @@ audioView : List Note -> List (Html Msg)
 audioView =
   List.map (\note ->
     voice note |> WebAudio.encode |> Json.Encode.encode 2 |> (\json ->
-      pre [ class "text-xs", class <| if note.triggered then "text-gray-800" else "text-gray-400" ] 
+      pre [ class "text-xs", class <| if note.triggered then "text-gray-800" else "text-gray-500" ] 
         [ code [ class "my-2" ] 
           [ text json ] 
         ]
@@ -178,9 +178,27 @@ view model =
   main_ [ class "m-10" ]
     [ h1 [ class "text-3xl my-10" ]
         [ text "elm-web-audio" ]
-    , div [ class "p-2 my-10" ]
-        [ text "Click anywhere to resume the audio context." ]
-    , div [ class "p-2 my-10" ]
+    , p [ class "p-2 my-6" ]
+        [ text """This package provides an elm/html-like API for declaring Web 
+          Audio graphs in Elm. The intention being that these `virtual` audio 
+          graphs are then sent via a port to be constructed by a javascript. 
+          There is a reference implementation of this found in the repository 
+          that you are free to copy until I or someone else releases a package 
+          formally.""" ]
+    , p [ class "p-2 my-6" ]
+        [ text """This site primarily serves as a demonstration that the library
+          actually works. If you'd like some more in depth documentation on the
+          Elm library itself you should check out the package """
+        , a [ href "https://package.elm-lang.org/packages/pd-andy/elm-web-audio/1.0.0/"
+            , class "text-indigo-500 hover:text-indigo-700"
+            ] 
+            [ text "here." ]  
+        ]
+    , p [ class "p-2 my-6" ]
+        [ text """A Web Audio context typically starts in a suspended state. 
+          If you can't hear any sound, click anywhere to resume the audio 
+          context.""" ]
+    , div [ class "p-2 my-6" ]
         [ button [ onClick TransposeUp, class "bg-indigo-500 text-white font-bold py-2 px-4 mr-4 rounded" ]
             [ text "Transpose up" ]
         , button [ onClick TransposeDown, class "bg-indigo-500 text-white font-bold py-2 px-4 rounded" ]
@@ -189,11 +207,9 @@ view model =
     , div [ class "flex" ]
         <| List.map noteView model.notes
     , div [ class "p-2 my-10" ]
-        [ text """
-            Below is the json send via ports to javascript. Active notes
-            are highlighted.
-        """ ]
-    , div [ class "bg-gray-200 p-2 my-10 rounded"]
+        [ text """Below is the json send via ports to javascript. Active notes 
+          are highlighted.""" ]
+    , div [ class "bg-gray-200 p-2 my-10 rounded h-64 overflow-scroll"]
         <| audioView model.notes
     ]
 

@@ -349,7 +349,7 @@ export default class VirtualAudioGraph {
       case 'AudioParam':
         $node[label].linearRampToValueAtTime(value, this.$context.currentTime + 0.01)
         break
-      case 'ScheduledAudioParam':
+      case 'ScheduledUpdate':
         $node[label][value.method](value.target, value.time)
         break
     }
@@ -365,7 +365,7 @@ export default class VirtualAudioGraph {
       case 'AudioParam':
         $node[label].value = $node[label].default
         break
-      case 'ScheduledAudioParam':
+      case 'ScheduledUpdate':
         // TODO: work out how to cancel scheduled updates
         break
     }

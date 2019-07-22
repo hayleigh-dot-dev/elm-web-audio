@@ -5094,6 +5094,14 @@ var author$project$WebAudio$Property$AudioParam = F2(
 		return {$: 'AudioParam', a: a, b: b};
 	});
 var author$project$WebAudio$Property$audioParam = author$project$WebAudio$Property$AudioParam;
+var author$project$WebAudio$Property$Value = function (a) {
+	return {$: 'Value', a: a};
+};
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
@@ -5487,12 +5495,7 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 		}
 	});
 var elm$json$Json$Encode$float = _Json_wrap;
-var author$project$WebAudio$Property$float = elm$json$Json$Encode$float;
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
+var author$project$WebAudio$Property$float = A2(elm$core$Basics$composeR, elm$json$Json$Encode$float, author$project$WebAudio$Property$Value);
 var author$project$WebAudio$Property$frequency = A2(
 	elm$core$Basics$composeR,
 	author$project$WebAudio$Property$float,
@@ -5556,7 +5559,12 @@ var author$project$WebAudio$Property$encodeScheduledUpdateValue = function (_n0)
 				_Utils_Tuple2(
 				'method',
 				author$project$WebAudio$Property$encodeScheduledUpdateMethod(method)),
-				_Utils_Tuple2('target', target),
+				_Utils_Tuple2(
+				'target',
+				function () {
+					var value = target.a;
+					return value;
+				}()),
 				_Utils_Tuple2(
 				'time',
 				elm$json$Json$Encode$float(time))
@@ -5566,7 +5574,7 @@ var author$project$WebAudio$Property$encode = function (property) {
 	switch (property.$) {
 		case 'NodeProperty':
 			var label = property.a;
-			var value = property.b;
+			var value = property.b.a;
 			return elm$json$Json$Encode$object(
 				_List_fromArray(
 					[
@@ -5580,7 +5588,7 @@ var author$project$WebAudio$Property$encode = function (property) {
 					]));
 		case 'AudioParam':
 			var label = property.a;
-			var value = property.b;
+			var value = property.b.a;
 			return elm$json$Json$Encode$object(
 				_List_fromArray(
 					[
@@ -10390,6 +10398,16 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
+						elm$html$Html$text('Click anywhere to resume the audio context.')
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('p-2 my-10')
+					]),
+				_List_fromArray(
+					[
 						A2(
 						elm$html$Html$button,
 						_List_fromArray(
@@ -11445,7 +11463,7 @@ function () {
           $node[label].linearRampToValueAtTime(value, this.$context.currentTime + 0.01);
           break;
 
-        case 'ScheduledAudioParam':
+        case 'ScheduledUpdate':
           $node[label][value.method](value.target, value.time);
           break;
       }
@@ -11467,7 +11485,7 @@ function () {
           $node[label].value = $node[label].default;
           break;
 
-        case 'ScheduledAudioParam':
+        case 'ScheduledUpdate':
           // TODO: work out how to cancel scheduled updates
           break;
       }
@@ -11553,7 +11571,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35973" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63562" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

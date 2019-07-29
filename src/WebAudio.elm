@@ -244,14 +244,22 @@ biquadFilter =
     Node "BiquadFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
+{-| Merges multiple mono inputs into a single multi-channel output. Because of
+the way elm-web-audio works, this node is largely useless as there is currently
+no way to specify which channel a node should connect to.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
 -}
 channelMerger : List Property -> List Node -> Node
 channelMerger =
     Node "ChannelMergerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChanneSplliterNode>
+{-| Splits a multi-channel input into a set of separate mono outputs. As with
+channelMerger, because of the way elm-web-audio currently works there is no way
+to address individual channels making this node largely useless.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ChanneSplliterNode>
 -}
 channelSplitter : List Property -> List Node -> Node
 channelSplitter =

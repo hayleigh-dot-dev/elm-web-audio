@@ -238,7 +238,17 @@ exponentialRampToValueAtTime property time =
         }
 
 -- Audio node properties -------------------------------------------------------
-{-| -}
+{-| Defines the time in seconds it takes to reduce a signal by 10dB in a 
+dynamicsCompressor node. If unset, this property defaults to 0.03.
+
+Nodes that use this property:
+- dynamicsCompressor
+
+Expected range:
+- min: `0`
+- max: `1`
+
+-}
 attack : Float -> Property
 attack =
   float >> audioParam "attack"

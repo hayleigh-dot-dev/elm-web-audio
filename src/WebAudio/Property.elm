@@ -253,7 +253,17 @@ attack : Float -> Property
 attack =
   float >> audioParam "attack"
 
-{-| -}
+{-| A list of samples making up a short audio clip. Due to current limitations
+with the elm-web-audio api, only *single channel* buffers are supported.
+
+Nodes that use this property:
+- audioBufferSource
+- convolver
+
+Expected range:
+- min: `-1`
+- max: `1`
+-}
 buffer : List Float -> Property
 buffer =
   floatList >> nodeProperty "buffer"

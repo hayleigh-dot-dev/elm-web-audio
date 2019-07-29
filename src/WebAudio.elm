@@ -223,7 +223,13 @@ audioDestination =
     Node "AudioDestinationNode" [] []
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
+{-| A simple low-order filter like a lowpass or highpass filter. Connecting an
+oscillator, biquadFilter, and gain node together gives you the most basic
+synthesiser.
+
+Filters are most often used to shape the tone of a sound. A lowpass filter, for
+example, cuts off high frequencies and makes a sound darker or more dull.
+
 Common properties:
 
   - frequency
@@ -231,6 +237,7 @@ Common properties:
   - Q
   - type
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
 -}
 biquadFilter : List Property -> List Node -> Node
 biquadFilter =

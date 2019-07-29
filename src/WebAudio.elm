@@ -439,11 +439,15 @@ panner =
     Node "PannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
+{-| Positions its audio input in either the left or right speakers (or somewhere
+in between). This is sufficient for most applications and much simpler than the
+complete panner node.
+
 Common properties:
 
   - pan
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
 -}
 stereoPanner : List Property -> List Node -> Node
 stereoPanner =

@@ -332,7 +332,10 @@ delay =
     Node "DelayNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
+{-| Compression is an effect that reduces the volume of the loudest parts of an
+audio signal, reducing the *dynamic range*. This "flattens" an audio signal and
+allows us to turn the volume up without the loudest parts causing distortion.
+
 Common properties:
 
   - threshold
@@ -342,6 +345,7 @@ Common properties:
   - attack
   - release
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
 -}
 dynamicsCompressor : List Property -> List Node -> Node
 dynamicsCompressor =

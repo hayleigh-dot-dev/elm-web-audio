@@ -315,11 +315,17 @@ dac =
     audioDestination
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
+{-| A delay node stores its input in a buffer and plays that back after a 
+specified amount of time. A common trick is to connect the output of a delay 
+into the input of itself (with a gain node inbetween), a process called 
+feedback. Setting the gain node to be some value below 1 produces an echo that
+fades out over time.
+
 Common properties:
 
   - delayTime
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
 -}
 delay : List Property -> List Node -> Node
 delay =

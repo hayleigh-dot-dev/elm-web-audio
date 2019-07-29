@@ -266,11 +266,20 @@ channelSplitter =
     Node "ChannelSplitterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
+{-| Represents a single value as an audio source. That is, if we create a
+constantSource with an offset of 1, it will produce 44100 (or whatever the
+sample rate is) 1s per second.
+
+This may seem useless at first, but constantSource nodes can connect to many
+properties at once and so can be used to manage multiple modulations at the 
+same time. The offset property itself can be modulated by another audio node,
+leading to complex modulations of multiple properties.
+
 Common properties:
 
   - offset
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
 -}
 constantSource : List Property -> List Node -> Node
 constantSource =

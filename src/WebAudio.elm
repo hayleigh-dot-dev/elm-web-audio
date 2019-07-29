@@ -192,7 +192,10 @@ key k n =
             Ref k
 
 -- Audio nodes -----------------------------------------------------------------
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
+{-| An audio node that contains an audio buffer to play. A buffer is an array of
+samples. These nodes are great for creating sample-heavy instruments like a drum
+machine, or for looping music samples to play along to,
+
 Common properties:
 
   - buffer
@@ -202,6 +205,7 @@ Common properties:
   - loopEnd
   - playbackRate
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
 -}
 audioBufferSource : List Property -> List Node -> Node
 audioBufferSource =

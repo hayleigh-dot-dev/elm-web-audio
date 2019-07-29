@@ -454,12 +454,16 @@ stereoPanner =
     Node "StereoPannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
+{-| Wave shaping is a synthesis and processing technique that (as you might have
+guessed) transforms the shape of an incoming waveform. It is most often used for
+distortion, such as the effect produced by a guitar fuzz effects pedal.
+
 Common properties:
 
   - curve
   - oversample
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
 -}
 waveShaper : List Property -> List Node -> Node
 waveShaper =

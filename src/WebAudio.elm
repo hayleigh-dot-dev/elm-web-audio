@@ -306,7 +306,9 @@ convolver =
     Node "ConvolverNode"
 
 
-{-| An alias for `audioDestination`.
+{-| An alias for `audioDestination`. DAC stands for digitial-to-analog converter
+and may be more familiar terminology for developers coming from other audio
+programming environments such as Max/MSP (plus it's shorter to type!).
 -}
 dac : Node
 dac =

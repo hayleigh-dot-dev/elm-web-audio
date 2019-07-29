@@ -286,12 +286,20 @@ constantSource =
     Node "ConstantSource"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
+{-| Convolution is a process of combining two audio signals together to produce
+a third. It's a fairly involved topic but just know it's not the same as simply
+summing two audio signals together.
+
+The most common use of a convolver is for reverb. An *impulse response* of a 
+room or space is recorded and set as a convolver's buffer, then audio fed 
+through the convolver node will sound like it was played in that space.
+
 Common properties:
 
   - buffer
   - normalize | normalise
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
 -}
 convolver : List Property -> List Node -> Node
 convolver =

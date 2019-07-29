@@ -383,13 +383,17 @@ iirFilter =
     Node "IIRFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
+{-| Produces a tone with a periodic waveform like a sine or square wave. This is
+the basic building block of synthesis, you just need an oscillator connected to
+the audioDestination to have a playable instrument!
+
 Common properties:
 
   - frequency
   - detune
   - type
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
 -}
 oscillator : List Property -> List Node -> Node
 oscillator =

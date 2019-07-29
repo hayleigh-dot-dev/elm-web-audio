@@ -369,7 +369,14 @@ gain =
     Node "GainNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/>
+{-| Creates a general infinite impulse response filter. This is getting a bit
+deeper into DSP territory so if you don't know what these are you probably don't
+need them.
+
+**Note**: There are currently no properties for the `feedforward` and `feedback`
+coefficients needed to construct these nodes exposed in `WebAudio.Property`.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/IIRFilterNode>
 -}
 iirFilter : List Property -> List Node -> Node
 iirFilter =

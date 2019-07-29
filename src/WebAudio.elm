@@ -407,7 +407,14 @@ osc =
     oscillator
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
+{-| The panner is used to position its input in some 3D space. It's a fairly
+involved node with a whole bunch of properties. More often than not, though,
+you'll be better served with the stereoPanner node (below) to position audio
+left or right.
+
+The MDN docs linked below are going to be the best resource if you're interested
+in using this node.
+
 Common properties:
 
   - coneInnerAngle
@@ -425,6 +432,7 @@ Common properties:
   - refDistance
   - rolloffFactor
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
 -}
 panner : List Property -> List Node -> Node
 panner =

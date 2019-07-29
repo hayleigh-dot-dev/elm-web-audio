@@ -192,7 +192,10 @@ key k n =
             Ref k
 
 -- Audio nodes -----------------------------------------------------------------
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
+{-| An audio node that contains an audio buffer to play. A buffer is an array of
+samples. These nodes are great for creating sample-heavy instruments like a drum
+machine, or for looping music samples to play along to,
+
 Common properties:
 
   - buffer
@@ -202,20 +205,31 @@ Common properties:
   - loopEnd
   - playbackRate
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
 -}
 audioBufferSource : List Property -> List Node -> Node
 audioBufferSource =
     Node "AudioBufferSourceNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
+{-| This is the "end" of an audio graph and usually represents your speakers or
+other output device. If you want to hear a node, it needs to connect to the
+audio destination.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
 -}
 audioDestination : Node
 audioDestination =
     Node "AudioDestinationNode" [] []
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
+{-| A simple low-order filter like a lowpass or highpass filter. Connecting an
+oscillator, biquadFilter, and gain node together gives you the most basic
+synthesiser.
+
+Filters are most often used to shape the tone of a sound. A lowpass filter, for
+example, cuts off high frequencies and makes a sound darker or more dull.
+
 Common properties:
 
   - frequency
@@ -223,68 +237,105 @@ Common properties:
   - Q
   - type
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
 -}
 biquadFilter : List Property -> List Node -> Node
 biquadFilter =
     Node "BiquadFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
+{-| Merges multiple mono inputs into a single multi-channel output. Because of
+the way elm-web-audio works, this node is largely useless as there is currently
+no way to specify which channel a node should connect to.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ChannelMergerNode>
 -}
 channelMerger : List Property -> List Node -> Node
 channelMerger =
     Node "ChannelMergerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ChanneSplliterNode>
+{-| Splits a multi-channel input into a set of separate mono outputs. As with
+channelMerger, because of the way elm-web-audio currently works there is no way
+to address individual channels making this node largely useless.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ChanneSplliterNode>
 -}
 channelSplitter : List Property -> List Node -> Node
 channelSplitter =
     Node "ChannelSplitterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
+{-| Represents a single value as an audio source. That is, if we create a
+constantSource with an offset of 1, it will produce 44100 (or whatever the
+sample rate is) 1s per second.
+
+This may seem useless at first, but constantSource nodes can connect to many
+properties at once and so can be used to manage multiple modulations at the 
+same time. The offset property itself can be modulated by another audio node,
+leading to complex modulations of multiple properties.
+
 Common properties:
 
   - offset
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
 -}
 constantSource : List Property -> List Node -> Node
 constantSource =
     Node "ConstantSource"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
+{-| Convolution is a process of combining two audio signals together to produce
+a third. It's a fairly involved topic but just know it's not the same as simply
+summing two audio signals together.
+
+The most common use of a convolver is for reverb. An *impulse response* of a 
+room or space is recorded and set as a convolver's buffer, then audio fed 
+through the convolver node will sound like it was played in that space.
+
 Common properties:
 
   - buffer
   - normalize | normalise
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
 -}
 convolver : List Property -> List Node -> Node
 convolver =
     Node "ConvolverNode"
 
 
-{-| An alias for `audioDestination`.
+{-| An alias for `audioDestination`. DAC stands for digitial-to-analog converter
+and may be more familiar terminology for developers coming from other audio
+programming environments such as Max/MSP (plus it's shorter to type!).
 -}
 dac : Node
 dac =
     audioDestination
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
+{-| A delay node stores its input in a buffer and plays that back after a 
+specified amount of time. A common trick is to connect the output of a delay 
+into the input of itself (with a gain node inbetween), a process called 
+feedback. Setting the gain node to be some value below 1 produces an echo that
+fades out over time.
+
 Common properties:
 
   - delayTime
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
 -}
 delay : List Property -> List Node -> Node
 delay =
     Node "DelayNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
+{-| Compression is an effect that reduces the volume of the loudest parts of an
+audio signal, reducing the *dynamic range*. This "flattens" an audio signal and
+allows us to turn the volume up without the loudest parts causing distortion.
+
 Common properties:
 
   - threshold
@@ -294,37 +345,55 @@ Common properties:
   - attack
   - release
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
 -}
 dynamicsCompressor : List Property -> List Node -> Node
 dynamicsCompressor =
     Node "DynamicsCompressorNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
+{-| A simple way to control the volume of any inputs connected to the gain node.
+A gain value of 1 is essentially a no-op, the volume is unaffected. 
+
+Because of the way the Web Audio API handles connections, a gain node with a 
+value of 1 is a handy way of summing multiple audio signals together.
+
 Common properties:
 
   - gain
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
 -}
 gain : List Property -> List Node -> Node
 gain =
     Node "GainNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/>
+{-| Creates a general infinite impulse response filter. This is getting a bit
+deeper into DSP territory so if you don't know what these are you probably don't
+need them.
+
+**Note**: There are currently no properties for the `feedforward` and `feedback`
+coefficients needed to construct these nodes exposed in `WebAudio.Property`.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/IIRFilterNode>
 -}
 iirFilter : List Property -> List Node -> Node
 iirFilter =
     Node "IIRFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
+{-| Produces a tone with a periodic waveform like a sine or square wave. This is
+the basic building block of synthesis, you just need an oscillator connected to
+the audioDestination to have a playable instrument!
+
 Common properties:
 
   - frequency
   - detune
   - type
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
 -}
 oscillator : List Property -> List Node -> Node
 oscillator =
@@ -338,7 +407,14 @@ osc =
     oscillator
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
+{-| The panner is used to position its input in some 3D space. It's a fairly
+involved node with a whole bunch of properties. More often than not, though,
+you'll be better served with the stereoPanner node (below) to position audio
+left or right.
+
+The MDN docs linked below are going to be the best resource if you're interested
+in using this node.
+
 Common properties:
 
   - coneInnerAngle
@@ -356,29 +432,38 @@ Common properties:
   - refDistance
   - rolloffFactor
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
 -}
 panner : List Property -> List Node -> Node
 panner =
     Node "PannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
+{-| Positions its audio input in either the left or right speakers (or somewhere
+in between). This is sufficient for most applications and much simpler than the
+complete panner node.
+
 Common properties:
 
   - pan
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
 -}
 stereoPanner : List Property -> List Node -> Node
 stereoPanner =
     Node "StereoPannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
+{-| Wave shaping is a synthesis and processing technique that (as you might have
+guessed) transforms the shape of an incoming waveform. It is most often used for
+distortion, such as the effect produced by a guitar fuzz effects pedal.
+
 Common properties:
 
   - curve
   - oversample
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
 -}
 waveShaper : List Property -> List Node -> Node
 waveShaper =

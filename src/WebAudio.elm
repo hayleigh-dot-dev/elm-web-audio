@@ -212,7 +212,11 @@ audioBufferSource =
     Node "AudioBufferSourceNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
+{-| This is the "end" of an audio graph and usually represents your speakers or
+other output device. If you want to hear a node, it needs to connect to the
+audio destination.
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
 -}
 audioDestination : Node
 audioDestination =

@@ -352,11 +352,17 @@ dynamicsCompressor =
     Node "DynamicsCompressorNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
+{-| A simple way to control the volume of any inputs connected to the gain node.
+A gain value of 1 is essentially a no-op, the volume is unaffected. 
+
+Because of the way the Web Audio API handles connections, a gain node with a 
+value of 1 is a handy way of summing multiple audio signals together.
+
 Common properties:
 
   - gain
 
+See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
 -}
 gain : List Property -> List Node -> Node
 gain =

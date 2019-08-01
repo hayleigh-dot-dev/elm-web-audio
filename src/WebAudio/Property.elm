@@ -271,7 +271,7 @@ buffer =
 {-| The angle, in degrees, of a cone in which there will be no volume reduction.
 
 Nodes that use this property:
-- pannerNode
+- panner
 
 Expected range:
 - min: `0`
@@ -288,7 +288,7 @@ coneInnerAngle =
 by a constant value (set by coneOuterGain).
 
 Nodes that use this property:
-- pannerNode
+- panner
 
 Expected range:
 - min: `0`
@@ -305,7 +305,7 @@ coneOuterAngle =
 coneOuterAngle.
 
 Nodes that use this property:
-- pannerNode
+- panner
 
 Expected range:
 - min: `0`
@@ -318,7 +318,18 @@ coneOuterGain : Float -> Property
 coneOuterGain =
   float >> nodeProperty "coneOuterGain"
 
-{-| -}
+{-| A list that describes the distortion curve to apply to the signal. The first
+element of the list is applied to signal values of -1, the last element of the
+list is applied to signal values of 1, and the mid-point in the list is applied
+to signal values of 0. When there are more than three items in the list, linear
+interpolation is performed.
+
+Nodes that use this property:
+- waveShaper
+
+See https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode for more
+information.
+-}
 curve : List Float -> Property
 curve =
   floatList >> nodeProperty "curve"

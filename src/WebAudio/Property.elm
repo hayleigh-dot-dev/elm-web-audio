@@ -334,7 +334,20 @@ curve : List Float -> Property
 curve =
   floatList >> nodeProperty "curve"
 
-{-| -}
+{-| The amount of delay to apply, in seconds, to an incoming signal. 
+
+Nodes that use this property:
+- delay
+
+Expected range:
+- min: `0`
+- max: see below...
+
+Note: Currently, when **first** creating a new delay node, the delayTime
+property will *also* be used to specify the *maximum possible delay time* for
+that node. The issue tracker can be found here:
+https://github.com/pd-andy/elm-web-audio/issues/7
+-}
 delayTime : Float -> Property
 delayTime =
   float >> audioParam "delayTime"

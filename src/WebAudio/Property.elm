@@ -352,7 +352,13 @@ delayTime : Float -> Property
 delayTime =
   float >> audioParam "delayTime"
 
-{-| -}
+{-| The amount, in cents, to detune the pitch of a signal. 100 cents corresponds
+to a pitch shift *up* of one semitone.
+
+Nodes that use this property:
+- audioBufferSource
+- oscillator
+-}
 detune : Float -> Property
 detune =
   float >> audioParam "detune"

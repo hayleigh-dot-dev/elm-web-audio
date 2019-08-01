@@ -381,7 +381,24 @@ distanceModel : String -> Property
 distanceModel =
   string >> nodeProperty "distanceModel"
 
-{-| -}
+{-| The size of the FFT window used by an analyser node. Must be a power of two.
+
+Nodes that use this property:
+- analyser (currently unsuported by elm-web-audio)
+
+Expected values:
+- `32`
+- `64`
+- `128`
+- `256`
+- `512`
+- `1024`
+- `2048`
+- `4096`
+- `8192`
+- `16384`
+- `32768`
+-}
 fftSize : Int -> Property
 fftSize =
   int >> nodeProperty "fftSize"

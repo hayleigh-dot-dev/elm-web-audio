@@ -363,7 +363,20 @@ detune : Float -> Property
 detune =
   float >> audioParam "detune"
 
-{-| -}
+{-| The algorithm used to determine how the volume of a signal is reduced as it
+is moved away from a listener.
+
+Nodes that use this property:
+- panner
+
+Expected values:
+- "linear"
+- "inverse"
+- "exponential"
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode/distanceModel
+for more information on each algorithm.
+-}
 distanceModel : String -> Property
 distanceModel =
   string >> nodeProperty "distanceModel"

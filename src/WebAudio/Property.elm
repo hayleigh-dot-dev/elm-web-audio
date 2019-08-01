@@ -284,7 +284,19 @@ coneInnerAngle : Float -> Property
 coneInnerAngle =
   float >> nodeProperty "coneInnerAngle"
 
-{-| -}
+{-| The angle, in degrees, of a cone outside of which the volume will be reduced
+by a constant value (set by coneOuterGain).
+
+Nodes that use this property:
+- pannerNode
+
+Expected range:
+- min: `0`
+- max: `360`
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode for more
+information.
+-}
 coneOuterAngle : Float -> Property
 coneOuterAngle =
   float >> nodeProperty "coneOuterAngle"

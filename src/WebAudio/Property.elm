@@ -403,7 +403,14 @@ fftSize : Int -> Property
 fftSize =
   int >> nodeProperty "fftSize"
 
-{-| -}
+{-| Means different things to different nodes. For oscillators, the frequency
+property sets the frequency of the generated tone. For filters, this sets the
+frequency that the filter starts to take effect at.
+
+Nodes that use this property:
+- biquadFilter
+- oscillator
+-}
 frequency : Float -> Property
 frequency =
   float >> audioParam "frequency"

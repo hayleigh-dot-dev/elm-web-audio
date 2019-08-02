@@ -48,6 +48,16 @@ type State
   | Running
   | Closed
 
+{-| The state of an AudioContext as a string. Occassionally useful if you need
+to display this information to the user.
+-}
+stateToString : State -> String
+stateToString state_ =
+  case state_ of
+    Suspended -> "Suspended"
+    Running -> "Running"
+    Closed -> "Closed"
+
 -- Accessors -------------------------------------------------------------------
 currentTimeDecoder : Decoder Float
 currentTimeDecoder =

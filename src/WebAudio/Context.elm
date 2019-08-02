@@ -1,7 +1,7 @@
 module WebAudio.Context exposing
   ( AudioContext, State(..)
   , currentTime, sampleRate, state, baseLatency, outputLatency
-  , every
+  , every, every_
   )
 
 {-|
@@ -13,7 +13,7 @@ module WebAudio.Context exposing
 @docs currentTime, sampleRate, state, baseLatency, outputLatency
 
 # Subscriptions
-@docs every
+@docs every, every_
 
 -}
 
@@ -153,7 +153,8 @@ updates!
       }
 
     type Msg
-      = NextStep Float
+      = NoOp
+      | NextStep Float
       | ...
 
     audio model =
@@ -164,10 +165,14 @@ updates!
 
     -- Every 250ms move to the next step in a sequencer.  
     subscriptions model =
-      every 0.25 model.time NextStep model.context
+      every 0.25 model.time NoOp NextStep model.context
+
+Because we poll rapidly with Time.every, we provide a NoOp msg to return whenver
+we're *not* at the next time interval. This is a necessary evil because of how
+Elm handles time subscriptions. 
 -}
-every : Float -> Float -> (Float -> msg) -> AudioContext -> Sub msg
-every interval prev msg context =
+every : Float -> Float -> msg -> (Float -> msg) -> AudioContext -> Sub msg
+every interval prev noop msg context =
   Time.every 25 (\_ ->
     let
       lookahead = 0.1
@@ -178,5 +183,26 @@ every interval prev msg context =
       if curr >= target - lookahead then
         msg (curr + diff)
       else
-        msg prev
+        noop
+  )
+
+{-| An alternative version of Context.every that allows you to supply the polling
+time for Time.every. The standard function polls the AudioContext current time
+every 25ms. This is fine for most applications, but can flood the update function
+with many NoOp msgs if you have a reasonably large time interval. You can use 
+this function to specify a custom, longer, polling time in these cases.
+-}
+every_ : Float -> Float -> Float -> msg -> (Float -> msg) -> AudioContext -> Sub msg
+every_ pollTime interval prev noop msg context =
+  Time.every pollTime (\_ ->
+    let
+      lookahead = 0.1
+      target = prev + interval
+      curr = currentTime context
+      diff = target - curr
+    in
+      if curr >= target - lookahead then
+        msg (curr + diff)
+      else
+        noop
   )

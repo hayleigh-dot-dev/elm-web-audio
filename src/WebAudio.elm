@@ -171,12 +171,12 @@ ref =
 nodes, or ref nodes, this will update the key to the new value.
 
     a = osc [ Property.freq 440 ] [ dac ]
-    b = keyedGain "b" [ Property.gain 0.5 ] [ dac ]
+    b = key "b" <| gain [ Property.gain 0.5 ] [ dac ]
     c = ref "b"
 
-    key a "myOsc" -- Give a the key "myOsc"
-    key b "myGain" -- Rename b's key to "myGain"
-    key c "myOsc" -- c is now a RefNode to "myOsc"
+    key "myOsc" a -- Give a the key "myOsc"
+    key "myGain" b -- Rename b's key to "myGain"
+    key "myOsc" c -- c is now a RefNode to "myOsc"
 
 -}
 key : Key -> Node -> Node

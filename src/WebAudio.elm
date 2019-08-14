@@ -1,6 +1,6 @@
 module WebAudio exposing
     ( Node, Type, Key, Graph
-    , node, ref, key
+    , node, ref, key, param
     , oscillator, osc, gain, audioDestination, dac, audioBufferSource, delay
     , channelMerger, channelSplitter, constantSource
     , biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
@@ -12,7 +12,7 @@ module WebAudio exposing
 @docs Node, Type, Key, Graph
 
 # Basic Constructors
-@docs node, ref, key
+@docs node, ref, key, param
 
 # Web Audio Nodes
 ## Common audio nodes
@@ -190,6 +190,26 @@ key k n =
 
         Ref _ ->
             Ref k
+
+{-| Audio nodes can connect to AudioParams to modulate their value. Use this
+function for that. The first argument is the key of an existing keyedd node and
+the second argument is the name of the AudioParam to connect to.
+
+This is commonly used for frequency modulation (FM) and amplitude modulation
+(AM) synthesis.
+
+    a = osc [ frequency 10 ] [ param "carrier" "frequency" ]
+    b = key "carrier" <| osc [] [ dac ]
+
+Under the hood, this actually just creates a standard ref node! You could create
+this function yourself:
+
+    param key name = ref (key ++ "." name)
+    
+-}
+param : Key -> String -> Node
+param k p =
+  ref (k ++ "." ++ p)
 
 -- Audio nodes -----------------------------------------------------------------
 {-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>

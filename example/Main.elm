@@ -12,6 +12,7 @@ import Json.Encode
 --
 import WebAudio
 import WebAudio.Property as Prop
+import WebAudio.Program
 
 -- Send the JSON encoded audio graph to javascript
 port updateAudio : Json.Encode.Value -> Cmd msg
@@ -19,11 +20,13 @@ port updateAudio : Json.Encode.Value -> Cmd msg
 -- MAIN -----------------------------------------------------------------------
 main : Program () Model Msg
 main =
-  Browser.element
+  WebAudio.Program.element
     { init = init
     , update = update
+    , audio = audio
     , view = view
     , subscriptions = subscriptions
+    , audioPort = updateAudio
     }
 
 -- MODEL ----------------------------------------------------------------------
@@ -58,7 +61,9 @@ initialModel =
 --
 init : () -> (Model, Cmd Msg)
 init _ =
-  Tuple.pair initialModel <| audio initialModel
+  ( initialModel
+  , Cmd.none
+  )
 
 -- UPDATE ---------------------------------------------------------------------
 type Msg
@@ -104,16 +109,24 @@ update msg model =
       Tuple.pair model Cmd.none
 
     NoteOn key ->
-      noteOn key model |> (\m -> Tuple.pair m (audio m))
+      ( noteOn key model
+      , Cmd.none
+      )
 
     NoteOff key ->
-      noteOff key model |> (\m -> Tuple.pair m (audio m))
+      ( noteOff key model
+      , Cmd.none
+      )
 
     TransposeUp ->
-      transposeUp model |> (\m -> Tuple.pair m (audio m))
+      ( transposeUp model
+      , Cmd.none
+      )
 
     TransposeDown ->
-      transposeDown model |> (\m -> Tuple.pair m (audio m))
+      ( transposeDown model
+      , Cmd.none
+      )
 
 -- AUDIO ----------------------------------------------------------------------
 -- Super simple utility function that takes a MIDI note number like 60 and
@@ -137,11 +150,9 @@ voice note =
 -- Notes to synth voices and encode the new list.
 -- Returns a Cmd Msg as we call the port from within this function (rather
 -- than returning the encoded JSON).
-audio : Model -> Cmd Msg
+audio : Model -> WebAudio.Graph
 audio model =
   List.map voice model.notes
-    |> WebAudio.encodeGraph
-    |> updateAudio
 
 -- VIEW -----------------------------------------------------------------------
 -- Use this to toggle the main styling on a note based on wheter it is currently

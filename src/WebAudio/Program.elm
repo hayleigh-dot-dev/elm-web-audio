@@ -5,7 +5,7 @@ module WebAudio.Program exposing
   )
 
 {-| Each of the functions contained in this module are wrappers for the existing
-Browser application types. They need just to additions to the record:
+Browser application types. They need just two additions to the record:
 
 - An audio function that takes your model and returns a `WebAudio.Graph`.
 

@@ -1,7 +1,9 @@
 {
   "scripts": {
     "example": "parcel example/index.html",
-    "deploy": "parcel build example/index.html --public-url /elm-web-audio && gh-pages -d dist"
+    "deploy": "parcel build example/index.html --public-url /elm-web-audio && gh-pages -d dist",
+    "docs:preview": "elm-doc-preview",
+    "docs:build": "elm make --docs=docs.json"
   },
   "devDependencies": {
     "elm-hot": "^1.0.1",

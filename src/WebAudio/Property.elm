@@ -453,7 +453,11 @@ knee : Float -> Property
 knee =
   float >> audioParam "knee"
 
-{-| -}
+{-| Toggles whether an audio buffer should loop or not.
+
+Nodes that use this property:
+- audioBufferSource
+-}
 loop : Bool -> Property
 loop =
   bool >> nodeProperty "loop"

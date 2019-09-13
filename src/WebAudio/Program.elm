@@ -2,6 +2,7 @@ module WebAudio.Program exposing
   ( element
   , document
   , application
+  , worker
   )
 
 {-| Each of the functions contained in this module are wrappers for the existing
@@ -42,7 +43,7 @@ The only program from Browser not support is `Browser.sandbox` as those
 programs cannot produce Cmds and so can't call the port needed to send our audio
 graph to javascript.
 
-@docs element, document, application
+@docs element, document, application, worker
 
 -}
 
@@ -124,4 +125,21 @@ application { init, update, audio, view, subscriptions, audioPort, onUrlRequest,
     , subscriptions = subscriptions
     , onUrlRequest = onUrlRequest
     , onUrlChange = onUrlChange
+    }
+
+{-|
+-}
+worker :
+  { init : flags -> ( model, Cmd msg )
+  , update : msg -> model -> ( model, Cmd msg )
+  , audio : model -> WebAudio.Graph
+  , subscriptions : model -> Sub msg
+  , audioPort : Value -> Cmd msg
+  } 
+  -> Program flags model msg
+worker { init, update, audio, subscriptions, audioPort } =
+  Platform.worker
+    { init = \flags -> init flags |> withAudio audioPort audio
+    , update = \msg model -> update msg model |> withAudio audioPort audio
+    , subscriptions = subscriptions
     }

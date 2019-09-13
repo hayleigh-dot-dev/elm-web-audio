@@ -415,7 +415,25 @@ frequency : Float -> Property
 frequency =
   float >> audioParam "frequency"
 
-{-| -}
+{-| Gain behaves differently for different nodes. For the gain node itself, the
+gain param acts as a scalar, multiplying the input signal by some amount. That
+means if we have a gain of 0.5 then we're halving the amplitude of a signal,
+and a gain of 2 means we're doubling the amplitude.
+
+For filter nodes, the gain param is described in terms of _decibels_. Volume
+changes with dB can seem a bit strange, as a rule of thumb: an increase of 
+**6dB** equals twice the amplitude, and an increase of **10dB** equals twice the
+perceived volume of a sound. 
+
+Nodes that use this property:
+- biquadFilter
+- gain
+
+Expected values for **biquadFilter**:
+- min: `-40`
+- max: `40`
+
+-}
 gain : Float -> Property
 gain =
   float >> audioParam "gain"

@@ -438,7 +438,17 @@ gain : Float -> Property
 gain =
   float >> audioParam "gain"
 
-{-| -}
+{-| Knee is the decibel value representing the range above the threshold where
+the curve transitions to the compressed signal.
+
+Nodes that use this property:
+- dynamicsNode
+
+Expected values:
+- min: `0`
+- max: `40`
+
+-}
 knee : Float -> Property
 knee =
   float >> audioParam "knee"

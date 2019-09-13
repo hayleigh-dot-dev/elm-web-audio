@@ -3,7 +3,7 @@
     "name": "pd-andy/elm-web-audio",
     "summary": "An elm/html-like library for the Web Audio API.",
     "license": "MIT",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "exposed-modules": [
         "WebAudio",
         "WebAudio.Property",

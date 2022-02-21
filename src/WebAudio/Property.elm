@@ -238,72 +238,226 @@ exponentialRampToValueAtTime property time =
         }
 
 -- Audio node properties -------------------------------------------------------
-{-| -}
+{-| Defines the time in seconds it takes to reduce a signal by 10dB in a 
+dynamicsCompressor node. If unset, this property defaults to 0.03.
+
+Nodes that use this property:
+- dynamicsCompressor
+
+Expected range:
+- min: `0`
+- max: `1`
+
+-}
 attack : Float -> Property
 attack =
   float >> audioParam "attack"
 
-{-| -}
+{-| A list of samples making up a short audio clip. Due to current limitations
+with the elm-web-audio api, only *single channel* buffers are supported.
+
+Nodes that use this property:
+- audioBufferSource
+- convolver
+
+Expected range:
+- min: `-1`
+- max: `1`
+-}
 buffer : List Float -> Property
 buffer =
   floatList >> nodeProperty "buffer"
 
-{-| -}
+{-| The angle, in degrees, of a cone in which there will be no volume reduction.
+
+Nodes that use this property:
+- panner
+
+Expected range:
+- min: `0`
+- max: `360`
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode for more
+information.
+-}
 coneInnerAngle : Float -> Property
 coneInnerAngle =
   float >> nodeProperty "coneInnerAngle"
 
-{-| -}
+{-| The angle, in degrees, of a cone outside of which the volume will be reduced
+by a constant value (set by coneOuterGain).
+
+Nodes that use this property:
+- panner
+
+Expected range:
+- min: `0`
+- max: `360`
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode for more
+information.
+-}
 coneOuterAngle : Float -> Property
 coneOuterAngle =
   float >> nodeProperty "coneOuterAngle"
 
-{-| -}
+{-| The amount of volume reduction to be applied outside of the cone defined by
+coneOuterAngle.
+
+Nodes that use this property:
+- panner
+
+Expected range:
+- min: `0`
+- max: `1`
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode for more
+information.
+-}
 coneOuterGain : Float -> Property
 coneOuterGain =
   float >> nodeProperty "coneOuterGain"
 
-{-| -}
+{-| A list that describes the distortion curve to apply to the signal. The first
+element of the list is applied to signal values of -1, the last element of the
+list is applied to signal values of 1, and the mid-point in the list is applied
+to signal values of 0. When there are more than three items in the list, linear
+interpolation is performed.
+
+Nodes that use this property:
+- waveShaper
+
+See https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode for more
+information.
+-}
 curve : List Float -> Property
 curve =
   floatList >> nodeProperty "curve"
 
-{-| -}
+{-| The amount of delay to apply, in seconds, to an incoming signal. 
+
+Nodes that use this property:
+- delay
+
+Expected range:
+- min: `0`
+- max: see below...
+
+Note: Currently, when **first** creating a new delay node, the delayTime
+property will *also* be used to specify the *maximum possible delay time* for
+that node. The issue tracker can be found here:
+https://github.com/pd-andy/elm-web-audio/issues/7
+-}
 delayTime : Float -> Property
 delayTime =
   float >> audioParam "delayTime"
 
-{-| -}
+{-| The amount, in cents, to detune the pitch of a signal. 100 cents corresponds
+to a pitch shift *up* of one semitone.
+
+Nodes that use this property:
+- audioBufferSource
+- oscillator
+-}
 detune : Float -> Property
 detune =
   float >> audioParam "detune"
 
-{-| -}
+{-| The algorithm used to determine how the volume of a signal is reduced as it
+is moved away from a listener.
+
+Nodes that use this property:
+- panner
+
+Expected values:
+- "linear"
+- "inverse"
+- "exponential"
+
+See https://developer.mozilla.org/en-US/docs/Web/API/PannerNode/distanceModel
+for more information on each algorithm.
+-}
 distanceModel : String -> Property
 distanceModel =
   string >> nodeProperty "distanceModel"
 
-{-| -}
+{-| The size of the FFT window used by an analyser node. Must be a power of two.
+
+Nodes that use this property:
+- analyser (currently unsuported by elm-web-audio)
+
+Expected values:
+- `32`
+- `64`
+- `128`
+- `256`
+- `512`
+- `1024`
+- `2048`
+- `4096`
+- `8192`
+- `16384`
+- `32768`
+-}
 fftSize : Int -> Property
 fftSize =
   int >> nodeProperty "fftSize"
 
-{-| -}
+{-| Means different things to different nodes. For oscillators, the frequency
+property sets the frequency of the generated tone. For filters, this sets the
+frequency that the filter starts to take effect at.
+
+Nodes that use this property:
+- biquadFilter
+- oscillator
+-}
 frequency : Float -> Property
 frequency =
   float >> audioParam "frequency"
 
-{-| -}
+{-| Gain behaves differently for different nodes. For the gain node itself, the
+gain param acts as a scalar, multiplying the input signal by some amount. That
+means if we have a gain of 0.5 then we're halving the amplitude of a signal,
+and a gain of 2 means we're doubling the amplitude.
+
+For filter nodes, the gain param is described in terms of _decibels_. Volume
+changes with dB can seem a bit strange, as a rule of thumb: an increase of 
+**6dB** equals twice the amplitude, and an increase of **10dB** equals twice the
+perceived volume of a sound. 
+
+Nodes that use this property:
+- biquadFilter
+- gain
+
+Expected values for **biquadFilter**:
+- min: `-40`
+- max: `40`
+
+-}
 gain : Float -> Property
 gain =
   float >> audioParam "gain"
 
-{-| -}
+{-| Knee is the decibel value representing the range above the threshold where
+the curve transitions to the compressed signal.
+
+Nodes that use this property:
+- dynamicsNode
+
+Expected values:
+- min: `0`
+- max: `40`
+
+-}
 knee : Float -> Property
 knee =
   float >> audioParam "knee"
 
-{-| -}
+{-| Toggles whether an audio buffer should loop or not.
+
+Nodes that use this property:
+- audioBufferSource
+-}
 loop : Bool -> Property
 loop =
   bool >> nodeProperty "loop"

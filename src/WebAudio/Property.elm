@@ -34,7 +34,7 @@ module WebAudio.Property exposing
 
 # Properties
 
-@docs amp, attack, buffer, coneInnerAngle, coneOuterAngle, coneOuterGain, curve
+@docs amp, attack, coneInnerAngle, coneOuterAngle, coneOuterGain, curve
 @docs delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee
 @docs loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels
 @docs normalize, offset, orientationX, orientationY, orientationZ, oversample
@@ -216,7 +216,7 @@ linearRampToValueAtTime time prop =
                 , time = time
                 }
 
-        ScheduledUpdate label { method, target } ->
+        ScheduledUpdate label { target } ->
             ScheduledUpdate label
                 { method = LinearRampToValueAtTime
                 , target = target

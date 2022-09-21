@@ -3,7 +3,8 @@ module WebAudio exposing
     , node, ref, keyed, param
     , oscillator, osc, gain, audioDestination, dac, delay
     , channelMerger, channelSplitter, constantSource
-    , biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
+    , biquadFilter, convolver, dynamicsCompressor, iirFilter, panner
+    , stereoPanner, waveShaper
     , encode
     )
 
@@ -35,9 +36,10 @@ module WebAudio exposing
 
 ## Signal processing nodes
 
-@docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
+@docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner
+@docs stereoPanner, waveShaper
 
-@docs encode, encodeGraph
+@docs encode
 
 -}
 

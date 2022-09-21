@@ -1,186 +1,156 @@
 module WebAudio exposing
-    ( Node, Type, Key, Graph
-    , node, ref, key, param
-    , oscillator, osc, gain, audioDestination, dac, audioBufferSource, delay
+    ( Node
+    , node, ref, keyed, param
+    , oscillator, osc, gain, audioDestination, dac, delay
     , channelMerger, channelSplitter, constantSource
     , biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
-    , encode, encodeGraph
+    , encode
     )
 
 {-|
+
+
 # Types
-@docs Node, Type, Key, Graph
+
+@docs Node
+
 
 # Basic Constructors
-@docs node, ref, key, param
+
+@docs node, ref, keyed, param
+
 
 # Web Audio Nodes
+
+
 ## Common audio nodes
-@docs oscillator, osc, gain, audioDestination, dac, audioBufferSource, delay
+
+@docs oscillator, osc, gain, audioDestination, dac, delay
+
 
 ## Utility nodes
+
 @docs channelMerger, channelSplitter, constantSource
 
+
 ## Signal processing nodes
+
 @docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner, stereoPanner, waveShaper
-
-# JSON Encoding
-To turn the json in Web Audio nodes, you need to know what that data looks like.
-Here's a breakdown of how everything is encoded:
-
-**Node:**
-
-```json
-{
-    "type": "OscillatorNode",
-    "properties": [
-        ...
-    ],
-    "connections": [
-        ...
-    ]
-}
-```
-
-**Keyed:**
-
-```json
-{
-    "key": "myOsc",
-    "type": "OscillatorNode",
-    "properties": [
-        ...
-    ],
-    "connections": [
-        ...
-    ]
-}
-```
-
-**Ref:**
-
-```json
-{
-    "key": "myOsc",
-    "type": "RefNode"
-}
-```
-
-Properties can come in two types, AudioParam and NodeProperty. While the Web 
-Audio API doesn't make an official distinction between the two, how they are 
-used differs.
-
-AudioParams represent parameters that can be updated at either audio rate 
-(a-rate) or control rate (k-rate). Other audio nodes can connect to an 
-AudioParam and modulate its value in real time. Examples of AudioParams include 
-frequency, gain, and delayTime.
-
-**AudioParam:**
-
-```json
-{
-    "type": "AudioParam",
-    "label": "frequency",
-    "value": 440
-}
-```
-
-NodeProperties are any other parameter on an audio node. An example of a 
-NodeProperty is an OscillatorNode's "type" parameter.
-
-**NodeProperty:**
-
-```json
-{
-   "type": "NodeProperty",
-   "label": "type",
-   "value": "square"
-}
-```
 
 @docs encode, encodeGraph
 
 -}
 
 -- Imports ---------------------------------------------------------------------
-import Json.Decode as Decode
-import Json.Encode as Encode exposing (encode)
-import WebAudio.Property as Property exposing (..)
+
+import Json.Encode
+import WebAudio.Property exposing (Property)
+
+
 
 -- Types -----------------------------------------------------------------------
-{-| The core building block of any Web Audio signal graph. `Keyed` nodes are 
-just like regular nodes but with an additonal `Key` property. This allows `Ref` 
-nodes to reference them elsewhere in the graph!
+
+
+{-| Represents a node in an audio processing singal graph. There are a handful
+of basic constructors: [`node`](#node) for creating typical audio nodes,
+[`keyed`](#keyed) for attaching a key or id to an existing node, and [`ref`](#ref)
+for referencing a node elsewhere in the graph by id.
+
+There are also a number of constructors for specific audio nodes, such as
+[`oscillator`](#oscillator) and [`gain`](#gain). These constructors mirror the
+low-level nodes provided by the Web Audio API: they make great building blocks!
+
+    import WebAudio
+    import WebAudio.Property
+
+    synth : Float -> Float -> List WebAudio.Node -> WebAudio.Node
+    synth freq gain connections =
+        WebAudio.oscillator
+            [ WebAudio.Parameters.frequency freq ]
+            [ WebAudio.gain
+                [ WebAudio.Parameters.gain gain ]
+                connections
+            ]
+
 -}
 type Node
-    = Node Type (List Property) (List Node)
-    | Keyed Key Type (List Property) (List Node)
-    | Ref Key
+    = Node String (List Property) (List Node)
+    | Keyed String String (List Property) (List Node)
+    | Ref String
 
-
-{-| A simple type alias representing the type of `Node`. This could be 
-something like "OscillatorNode" or "RefNode".
--}
-type alias Type =
-    String
-
-
-{-| A simple type alias representing unique key used to identify nodes. Use 
-`Key`s like you would use the `id` attribute on a HTML element.
--}
-type alias Key =
-    String
-
-
-{-| -}
-type alias Graph =
-    List Node
 
 
 -- Node constructors -----------------------------------------------------------
-{-| General way to construct Web Audio nodes. This is used to create all the 
-helper functions below. You can use this function to define custom nodes by 
-partially applying just the `type` parameter. This is handy if you're using a 
-library like Tone.js and want to use those nodes in Elm.
 
-    omniOscillator : List Property -> List Node -> Node
+
+{-| The most general way to construct Web Audio nodes. This is used to create all
+the helper functions below.
+
+You can use this function to define custom nodes by partially applying just the
+`type` parameter. This is handy if you're using a library like Tone.js and want
+to use those nodes in Elm.
+
+    import WebAudio
+    import WebAudio.Property exposing (Property)
+
+    omniOscillator : List Property -> List WebAudio.Node -> WebAudio.Node
     omniOscillator =
-        node "Tone-OmniOscillatorNode"
+        WebAudio.node "Tone-OmniOscillatorNode"
 
+    myOsc : WebAudio.Node
     myOsc =
         omniOscillator
-            [ Property.freq 440 ]
-            [ dac ]
+            [ WebAudio.Property.frequency 440 ]
+            [ WebAudio.dac ]
 
 -}
-node : Type -> List Property -> List Node -> Node
+node : String -> List Property -> List Node -> Node
 node =
     Node
 
 
-{-| A ref node is used to refer to a keyed node elsewhere in the graph. This is 
-how we connect multiple "chains" of nodes together and represet a graph in a 
-simple list.
+{-| A ref node is used to refer to some other audio node by id. We can do things
+like create a feedback loop by connecting a node back into itself.
+
+    import WebAudio
+    import WebAudio.Property exposing (Property)
+
+    feedbackDelay : Float -> Float -> List WebAudio.Node -> WebAudio.Node
+    feedbackDelay amount time connections =
+        WebAudio.keyed "feedback-delay" <|
+            WebAudio.delay
+                [ WebAudio.Property.delayTime time ]
+                [ WebAudio.gain
+                    [ WebAudio.Property.gain gain ]
+                    -- Reference the delay node above by its key. This sends
+                    -- the output of the gain node back into the delay node,
+                    -- creating a feedback loop!
+                    (WebAudio.ref "feedback-delay" :: connections)
+                ]
+
+    synth : Float -> Float -> WebAudio.Node
+    synth freq gain =
+        WebAudio.oscillator
+            [ WebAudio.Parameters.frequency freq ]
+            [ WebAudio.gain
+                [ WebAudio.Parameters.gain gain ]
+                [ feedbackDelay 0.45 250 <|
+                    [ WebAudio.dac ]
+                ]
+            ]
+
 -}
-ref : Key -> Node
+ref : String -> Node
 ref =
     Ref
 
 
-{-| Use this function to apply a key to a node. In the case of already keyed 
-nodes, or ref nodes, this will update the key to the new value.
-
-    a = osc [ Property.freq 440 ] [ dac ]
-    b = key "b" <| gain [ Property.gain 0.5 ] [ dac ]
-    c = ref "b"
-
-    key "myOsc" a -- Give a the key "myOsc"
-    key "myGain" b -- Rename b's key to "myGain"
-    key "myOsc" c -- c is now a RefNode to "myOsc"
-
+{-| Attach a key or id to an existing node. This is commonly used in conjunction
+with [`ref`](#ref) nodes to create feedback loops and other more complex signal
+graphs.
 -}
-key : Key -> Node -> Node
-key k n =
+keyed : String -> Node -> Node
+keyed k n =
     case n of
         Node t ps cs ->
             Keyed k t ps cs
@@ -191,44 +161,56 @@ key k n =
         Ref _ ->
             Ref k
 
-{-| Audio nodes can connect to AudioParams to modulate their value. Use this
-function for that. The first argument is the key of an existing keyedd node and
-the second argument is the name of the AudioParam to connect to.
 
-This is commonly used for frequency modulation (FM) and amplitude modulation
-(AM) synthesis.
+{-| Typically we chain audio nodes together either implicitly by nesting them or
+explicitly by using [`ref`](#ref) nodes but there is a third way to connect
+audio nodes: by connecting them to certain audio params!
 
-    a = osc [ frequency 10 ] [ param "carrier" "frequency" ]
-    b = key "carrier" <| osc [] [ dac ]
+This is useful for common synthesis techniques like AM and FM synthesis, or
+modulating parameters like cutoff frequencer of a filter using an oscillator.
 
-Under the hood, this actually just creates a standard ref node! You could create
-this function yourself:
+    import WebAudio
+    import WebAudio.Property
 
-    param key name = ref (key ++ "." name)
-    
+    audio : List WebAudio.Node
+    audio =
+        [ WebAudio.oscillator
+            [ WebAudio.Property.frequency 5 ]
+            -- Connect to the "frequency" parameter of the "carrier" node
+            [ WebAudio.param "carrier" "frequency" ]
+        , WebAudio.keyed "carrier" <|
+            WebAudio.oscillator []
+                [ WebAudio.dac ]
+        ]
+
 -}
-param : Key -> String -> Node
+param : String -> String -> Node
 param k p =
-  ref (k ++ "." ++ p)
+    ref (k ++ "." ++ p)
+
+
 
 -- Audio nodes -----------------------------------------------------------------
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode>
-Common properties:
-
-  - buffer
-  - detune
-  - loop
-  - loopStart
-  - loopEnd
-  - playbackRate
-
--}
-audioBufferSource : List Property -> List Node -> Node
-audioBufferSource =
-    Node "AudioBufferSourceNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
+{-| The audio destination is... the destination of our audio! Connect to this
+node to get sound coming out of your speakers.
+
+It doesn't have any parameters itself, and it doesn't make sense to connect
+the destination to anything else; it's the end of the line.
+
+    import WebAudio
+    import WebAudio.Property
+
+    audio : List WebAudio.Node
+    audio =
+        [ WebAudio.oscillator
+            [ WebAudio.Property.frequency 440 ]
+            [ WebAudio.audioDestination ]
+        ]
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/AudioDestinationNode>
+
 -}
 audioDestination : Node
 audioDestination =
@@ -286,7 +268,8 @@ convolver =
     Node "ConvolverNode"
 
 
-{-| An alias for `audioDestination`.
+{-| An alias for `audioDestination`. DAC is another common name for output: it
+stands for _digital to analog converter_.
 -}
 dac : Node
 dac =
@@ -352,6 +335,11 @@ oscillator =
 
 
 {-| An alias for `oscillator`.
+
+It turns out oscillators are pretty common in lots of audio signal graphs. It
+also turns out that "oscillator" is a pretty long word, so you can use `osc`
+instead to save your fingers and your eyes.
+
 -}
 osc : List Property -> List Node -> Node
 osc =
@@ -405,38 +393,37 @@ waveShaper =
     Node "WaveShaperNode"
 
 
+
 -- JSON encoding ---------------------------------------------------------------
-{-| Converts a `Node` into a Json value. Use this to send a node through a port 
-to javascipt, where it can be constructed into a Web Audio node!
+
+
+{-| Converts a `Node` into a value we can through a port to some JavaScript that
+can actually convert our signal graph into Web Audio code.
+
+You could also go on to seriliase the graph with `Json.Encode.encode` and send
+it to a server, store it in LocalStorage, or other fun things.
+
 -}
-encode : Node -> Encode.Value
+encode : Node -> Json.Encode.Value
 encode n =
     case n of
         Node t ps cs ->
-            Encode.object
-                [ ( "type", Encode.string t )
-                , ( "properties", Encode.list Property.encode ps )
-                , ( "connections", Encode.list encode cs )
+            Json.Encode.object
+                [ ( "type", Json.Encode.string t )
+                , ( "properties", Json.Encode.list WebAudio.Property.encode ps )
+                , ( "connections", Json.Encode.list encode cs )
                 ]
 
         Keyed k t ps cs ->
-            Encode.object
-                [ ( "key", Encode.string k )
-                , ( "type", Encode.string t )
-                , ( "properties", Encode.list Property.encode ps )
-                , ( "connections", Encode.list encode cs )
+            Json.Encode.object
+                [ ( "key", Json.Encode.string k )
+                , ( "type", Json.Encode.string t )
+                , ( "properties", Json.Encode.list WebAudio.Property.encode ps )
+                , ( "connections", Json.Encode.list encode cs )
                 ]
 
         Ref k ->
-            Encode.object
-                [ ( "key", Encode.string k )
-                , ( "type", Encode.string "RefNode" )
+            Json.Encode.object
+                [ ( "key", Json.Encode.string k )
+                , ( "type", Json.Encode.string "RefNode" )
                 ]
-
-
-{-| Encode a graph of nodes into a Json value. More than likely you'll use this 
-more than `encode`
--}
-encodeGraph : Graph -> Encode.Value
-encodeGraph =
-    Encode.list encode

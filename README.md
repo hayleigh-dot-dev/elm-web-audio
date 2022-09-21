@@ -48,7 +48,16 @@ Notice how we're using our application's Model to set the frequency of the oscil
 If we hook our application up right, we get all the benefits of The Elm Architecture
 for our audio graph just as we do for our view!
 
+One really powerful consequence of this approach is that both our application's
+UI *and* it's signal processing are derived from the same source of truth. This
+can drastically reduce the possibility that our UI and our audio state reflect
+different states, or eliminate it entirely.
+
 ## Usage
+
+The easiest way to get started is to trigger and audio update whenever your
+normal `update` function is called. We can do this in a set-and-forget fashion
+by quickly
 
 ```elm
 port module Main exposing (main)
@@ -94,6 +103,46 @@ audio model =
     ]
 ```
 
+You could, of course, trigger audio updates manually and explicitly only when
+certain `Msg`s are received:
+
+```elm
+type Msg
+    = GotSomeInput String
+    | GotMousePos ( Float, Float )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GotSomeInput input ->
+            ...
+
+        GotMousePos ( x, y ) ->
+            ( ...
+            , audio x y
+                |> Json.Encode.list WebAudio.encode
+                |> toWebAudio
+            )
+        
+
+audio : Float -> Float -> List WebAudio.Node
+audio x y =
+    [ WebAudio.oscillator 
+        [ WebAudio.Property.frequency model.x ]
+        [ WebAudio.gain
+            [ WebAudio.Property.gain model.y ]
+            [ Webudio.audioDestination ]
+        ]
+    ]
+```
+
+### Actually making sound
+
+Elm doesn't provide any way for packages to interact with JavaScript code, so
+we need to use ports to communicate with the Web Audio API. This means there's a
+little bit of setup required before we can start making sound.
+
 There is a hacked together example of a "Virtual Audio Context" in this repository
 as `elm-web-audio.js`. This is a basic implementation that manages the actual
 Web Audio graph, diffing it against new graphs coming from your elm app, and
@@ -110,7 +159,7 @@ const ctx = new AudioContext()
 const virtualCtx = new VirtualAudioContext(ctx)
 
 const app = Elm.Main.init({
-    node: document.getElementById('root'),
+    node: document.querySelector(...),
     flags: {
         // ...
     }

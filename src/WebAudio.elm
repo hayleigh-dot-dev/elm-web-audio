@@ -39,6 +39,9 @@ module WebAudio exposing
 @docs biquadFilter, convolver, dynamicsCompressor, iirFilter, panner
 @docs stereoPanner, waveShaper
 
+
+## JSON Encoding
+
 @docs encode
 
 -}
@@ -219,13 +222,14 @@ audioDestination =
     Node "AudioDestinationNode" [] []
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
-Common properties:
+{-| Common properties:
 
-  - frequency
-  - detune
-  - Q
-  - type
+  - [`frequency`](./WebAudio-Property#frequency)
+  - [`detune`](./WebAudio-Property#detune)
+  - [`q`](./WebAudio-Property#q)
+  - [`gain`](./WebAudio-Property#gain)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode>
 
 -}
 biquadFilter : List Property -> List Node -> Node
@@ -247,10 +251,11 @@ channelSplitter =
     Node "ChannelSplitterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
-Common properties:
+{-| Common properties:
 
-  - offset
+  - [`offset`](./WebAudio-Property#offset)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConstantSourceNode>
 
 -}
 constantSource : List Property -> List Node -> Node
@@ -258,11 +263,12 @@ constantSource =
     Node "ConstantSource"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
-Common properties:
+{-| Common properties:
 
-  - buffer
-  - normalize | normalise
+  - [`buffer`](./WebAudio-Property#buffer)
+  - [`normalise`](./WebAudio-Property#normalise) | [`normalize`](./WebAudio-Property#normalize)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/ConvolverNode>
 
 -}
 convolver : List Property -> List Node -> Node
@@ -270,18 +276,19 @@ convolver =
     Node "ConvolverNode"
 
 
-{-| An alias for `audioDestination`. DAC is another common name for output: it
-stands for _digital to analog converter_.
+{-| An alias for `audioDestination`. "dac" is another common name for an output:
+it stands for _digital to analog converter_.
 -}
 dac : Node
 dac =
     audioDestination
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
-Common properties:
+{-| Common properties:
 
-  - delayTime
+  - [`delayTime`](./WebAudio-Property#delayTime)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DelayNode>
 
 -}
 delay : List Property -> List Node -> Node
@@ -289,15 +296,16 @@ delay =
     Node "DelayNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
-Common properties:
+{-| Common properties:
 
-  - threshold
-  - knee
-  - ratio
-  - reduction
-  - attack
-  - release
+  - [`threshold`](./WebAudio-Property#threshold)
+  - [`knee`](./WebAudio-Property#knee)
+  - [`ratio`](./WebAudio-Property#ratio)
+  - [`reduction`](./WebAudio-Property#reduction)
+  - [`attack`](./WebAudio-Property#attack)
+  - [`release`](./WebAudio-Property#release)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode>
 
 -}
 dynamicsCompressor : List Property -> List Node -> Node
@@ -305,10 +313,11 @@ dynamicsCompressor =
     Node "DynamicsCompressorNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
-Common properties:
+{-| Common properties:
 
-  - gain
+  - [`gain`](./WebAudio-Property#gain)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/GainNode>
 
 -}
 gain : List Property -> List Node -> Node
@@ -323,12 +332,13 @@ iirFilter =
     Node "IIRFilterNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
-Common properties:
+{-| Common properties:
 
-  - frequency
-  - detune
-  - type
+  - [`frequency`](./WebAudio-Property#frequency)
+  - [`detune`](./WebAudio-Property#detune)
+  - [`type`](./WebAudio-Property#type)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode>
 
 -}
 oscillator : List Property -> List Node -> Node
@@ -336,7 +346,7 @@ oscillator =
     Node "OscillatorNode"
 
 
-{-| An alias for `oscillator`.
+{-| An alias for [`oscillator`](#oscillator).
 
 It turns out oscillators are pretty common in lots of audio signal graphs. It
 also turns out that "oscillator" is a pretty long word, so you can use `osc`
@@ -348,23 +358,24 @@ osc =
     oscillator
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
-Common properties:
+{-| Common properties:
 
-  - coneInnerAngle
-  - coneOuterAngle
-  - coneOuterGain
-  - distanceModel
-  - maxDistance
-  - orientationX
-  - orientationY
-  - orientationZ
-  - panningModel
-  - positionX
-  - positionY
-  - positionZ
-  - refDistance
-  - rolloffFactor
+  - [`coneInnerAngle`](./WebAudio-Property#coneInnerAngle)
+  - [`coneOuterAngle`](./WebAudio-Property#coneOuterAngle)
+  - [`coneOuterGain`](./WebAudio-Property#coneOuterGain)
+  - [`distanceModel`](./WebAudio-Property#distanceModel)
+  - [`maxDistance`](./WebAudio-Property#maxDistance)
+  - [`orientationX`](./WebAudio-Property#orientationX)
+  - [`orientationY`](./WebAudio-Property#orientationY)
+  - [`orientationZ`](./WebAudio-Property#orientationZ)
+  - [`panningModel`](./WebAudio-Property#panningModel)
+  - [`positionX`](./WebAudio-Property#positionX)
+  - [`positionY`](./WebAudio-Property#positionY)
+  - [`positionZ`](./WebAudio-Property#positionZ)
+  - [`refDistance`](./WebAudio-Property#refDistance)
+  - [`rolloffFactor`](./WebAudio-Property#rolloffFactor)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/PannerNode>
 
 -}
 panner : List Property -> List Node -> Node
@@ -372,10 +383,11 @@ panner =
     Node "PannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
-Common properties:
+{-| Common properties:
 
-  - pan
+  - [`pan`](./WebAudio-Property#pan)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/StereoPannerNode>
 
 -}
 stereoPanner : List Property -> List Node -> Node
@@ -383,11 +395,12 @@ stereoPanner =
     Node "StereoPannerNode"
 
 
-{-| See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
-Common properties:
+{-| Common properties:
 
-  - curve
-  - oversample
+  - [`curve`](./WebAudio-Property#curve)
+  - [`oversample`](./WebAudio-Property#oversample)
+
+See: <https://developer.mozilla.org/en-US/docs/Web/API/WaveShaperNode>
 
 -}
 waveShaper : List Property -> List Node -> Node
@@ -396,7 +409,7 @@ waveShaper =
 
 
 
--- JSON encoding ---------------------------------------------------------------
+-- JSON ENCODING ---------------------------------------------------------------
 
 
 {-| Converts a `Node` into a value we can through a port to some JavaScript that

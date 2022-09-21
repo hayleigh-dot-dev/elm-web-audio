@@ -6,9 +6,9 @@ module WebAudio.Property exposing
     , amp, attack, coneInnerAngle, coneOuterAngle, coneOuterGain, curve
     , delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee
     , loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels
-    , normalize, offset, orientationX, orientationY, orientationZ, oversample
-    , pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio
-    , reduction, refDistance, release, rolloffFactor, smoothingTimeConstant
+    , normalize, normalise, offset, orientationX, orientationY, orientationZ
+    , oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ
+    , q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant
     , threshold, type_
     , encode
     )
@@ -37,9 +37,9 @@ module WebAudio.Property exposing
 @docs amp, attack, coneInnerAngle, coneOuterAngle, coneOuterGain, curve
 @docs delayTime, detune, distanceModel, fftSize, frequency, freq, gain, knee
 @docs loop, loopEnd, loopStart, maxChannelCount, maxDecibels, minDecibels
-@docs normalize, offset, orientationX, orientationY, orientationZ, oversample
-@docs pan, panningModel, playbackRate, positionX, positionY, positionZ, q, ratio
-@docs reduction, refDistance, release, rolloffFactor, smoothingTimeConstant
+@docs normalize, normalise, offset, orientationX, orientationY, orientationZ
+@docs oversample, pan, panningModel, playbackRate, positionX, positionY, positionZ
+@docs q, ratio, reduction, refDistance, release, rolloffFactor, smoothingTimeConstant
 @docs threshold, type_
 
 
@@ -171,7 +171,48 @@ in JavaScript:
             (time + 1)
             (WebAudio.Property.frequency 880)
 
-❗️
+❗️ Note that we're taking in a `Float` here for the current time, and using that
+to calculate the time at which we want to set the value. Because our audio graphs
+are _declarative_ we don't schedule things from _now_, but rather we schedule
+things for fixed, known values of time.
+
+The best way to get the current time is to use [`every`](./WebAudio-Context#every)
+or [`at`](./WebAudio-Context#at) to trigger a message carrying the context's
+current time. If you want to trigger things to happen based on the time a
+particular user event such as a click occured you can use
+[`currentTime`](./WebAudio-Context#currentTime) to get the current time from the
+context.
+
+    import WebAudio
+    import WebAudio.Context exposing (Context)
+    import WebAudio.Property
+
+    type Event
+        = NoteOn Float
+        | ...
+
+    audio : Context -> Event -> List WebAudio.Node
+    audio context event =
+        case event of
+            NoteOn time ->
+                [ WebAudio.oscillator
+                    -- See the docs further down for what
+                    -- `linearRampToValueAtTime` does!
+                    [ WebAudio.Property.linearRampToValueAtTime
+                        (WebAudio.Context.currentTime context + 1)
+                        (WebAudio.Property.frequency 880)
+                    ]
+                    [ WebAudio.gain
+                        [ WebAudio.Property.gain 0.5 ]
+                        [ WebAudio.audioDestination ]
+                    ]
+                ]
+
+            _ ->
+                ...
+
+Be really careful when doing this, you can accidentally schedule a bunch of
+overlapping events if you're not paying attention!
 
 -}
 setValueAtTime : Float -> Property -> Property
@@ -416,6 +457,12 @@ minDecibels =
 
 
 {-| -}
+normalise : Bool -> Property
+normalise =
+    normalize
+
+
+{-| -}
 normalize : Bool -> Property
 normalize =
     bool >> property "normalize"
@@ -542,7 +589,7 @@ type_ =
 
 
 
--- JSON encoding ---------------------------------------------------------------
+-- JSON ENCODING ---------------------------------------------------------------
 
 
 {-| -}

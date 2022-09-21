@@ -2,7 +2,7 @@ module WebAudio.Context exposing
     ( AudioContext, State(..)
     , from
     , currentTime, sampleRate, state, baseLatency, outputLatency
-    , every
+    , every, at
     )
 
 {-|
@@ -25,7 +25,7 @@ module WebAudio.Context exposing
 
 # Subscriptions
 
-@docs every
+@docs every, at
 
 -}
 
@@ -260,7 +260,7 @@ milliseconds in the future. This works great when combined with scheduled parame
 updates!
 
     type alias Model =
-      { time : Float
+        { time : Float
       , context : AudioContext
       , freq : Float
       , ...
@@ -309,3 +309,30 @@ every interval prev noop msg context =
             else
                 noop
         )
+
+
+{-| -}
+at : Float -> msg -> (Float -> msg) -> AudioContext -> Sub msg
+at target noop msg context =
+    if currentTime context >= target then
+        Sub.none
+
+    else
+        Time.every 25
+            (\_ ->
+                let
+                    lookahead =
+                        0.1
+
+                    curr =
+                        currentTime context
+
+                    diff =
+                        target - curr
+                in
+                if curr >= target - lookahead then
+                    msg (curr + diff)
+
+                else
+                    noop
+            )

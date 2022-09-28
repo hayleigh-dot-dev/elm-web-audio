@@ -76,23 +76,25 @@ type State
 from : Json.Decode.Value -> Maybe AudioContext
 from js =
     let
-        -- Decode the six properties that exist on the `BaseAudioContext`
-        -- interface. If any of them fail, we know that the value is not an
-        -- AudioContext! We don't actually care about the values, though, so we
-        -- use the `Json.Decode.value` decoder to essentially just check the
-        -- existence of a property and then "wrap" it back up in an opaque `Value`.
+        -- Decode the three properties that exist on the `BaseAudioContext`
+        -- interface that we actually use. If any of them fail, we know that the
+        -- value is not an AudioContext!
+        --
+        -- We don't actually care about the values, though, so we use the
+        -- `Json.Decode.value` decoder to essentially just check the eistence of
+        --a property and then "wrap" it back up in an opaque `Value`.
         --
         -- https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext
         --
         -- This will work on any classes that extend BaseAudioContext, so any
-        -- custom AudioContexts should work too, but it *won't* work on anything
-        -- else.
+        -- custom AudioContexts should work too, it'll also work on anything
+        -- that has a `currentTime`, `sampleRate`, and `state` property.
         decoder =
-            Json.Decode.map6 (\_ _ _ _ _ _ -> ())
-                (Json.Decode.field "audioWorklet" Json.Decode.value)
+            Json.Decode.map3 (\_ _ _ -> ())
+                -- (Json.Decode.field "audioWorklet" Json.Decode.value)
                 (Json.Decode.field "currentTime" Json.Decode.value)
-                (Json.Decode.field "destination" Json.Decode.value)
-                (Json.Decode.field "listener" Json.Decode.value)
+                -- (Json.Decode.field "destination" Json.Decode.value)
+                -- (Json.Decode.field "listener" Json.Decode.value)
                 (Json.Decode.field "sampleRate" Json.Decode.value)
                 (Json.Decode.field "state" Json.Decode.value)
                 |> Json.Decode.map (\_ -> AudioContext js)

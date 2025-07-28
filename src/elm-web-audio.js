@@ -290,7 +290,7 @@ export class VirtualAudioContext extends AudioContext {
 
         window.setTimeout(() => {
             if (from in this.nodes && toNode in this.nodes) {
-                if (toParam && toParam in this.nodes) {
+                if (toParam && toParam in this.nodes[toNode]) {
                     this.nodes[from].connect(this.nodes[toNode][toParam])
                 } else {
                     this.nodes[from].connect(this.nodes[toNode], 0, 0)
